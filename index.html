@@ -183,7 +183,7 @@
 <script type="text/babel">
 const{useState,useEffect}=React;
 
-const ADMIN_PASSWORD='ADMIN';
+const ADMIN_PASSWORD='Albert14$';
 const getApiUrl=()=>localStorage.getItem('timetrack_api_url')||'';
 const api={async call(action,params={},postData=null){const url=new URL(getApiUrl());url.searchParams.set('action',action);Object.entries(params).forEach(([k,v])=>{if(v)url.searchParams.set(k,v)});const options={method:postData?'POST':'GET'};if(postData)options.body=JSON.stringify(postData);const response=await fetch(url.toString(),options);return response.json()}};
 
