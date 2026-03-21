@@ -169,7 +169,7 @@
     .rest-notice{background:rgba(170,102,255,.15);border:1px solid var(--accent-purple);border-radius:16px;padding:30px;text-align:center;margin-top:14px}
     .rest-notice .icon{font-size:2.5rem;margin-bottom:10px}
     .rest-notice .title{font-size:1.2rem;font-weight:600;color:var(--accent-purple)}
-    .no-schedule{color:var(--accent-warning);font-size:.8rem;margin-top:14px;padding:12px;background:rgba(255,170,0,.1);border-radius:10px;text-align:center}
+    .no-schedule-notice{color:var(--accent-secondary);font-size:.8rem;margin-top:14px;padding:12px;background:rgba(0,204,255,0.1);border-radius:10px;text-align:center}
     .history-list{max-height:250px;overflow-y:auto}
     .history-item{display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--bg-elevated);border-radius:10px;margin-bottom:8px}
     .history-item .date{font-family:'Space Mono',monospace;font-size:.8rem}
@@ -183,7 +183,7 @@
 <script type="text/babel">
 const{useState,useEffect}=React;
 
-const ADMIN_PASSWORD='Albert14$';
+const ADMIN_PASSWORD='ADMIN';
 const getApiUrl=()=>localStorage.getItem('timetrack_api_url')||'';
 const api={async call(action,params={},postData=null){const url=new URL(getApiUrl());url.searchParams.set('action',action);Object.entries(params).forEach(([k,v])=>{if(v)url.searchParams.set(k,v)});const options={method:postData?'POST':'GET'};if(postData)options.body=JSON.stringify(postData);const response=await fetch(url.toString(),options);return response.json()}};
 
@@ -193,11 +193,23 @@ const formatTime=(d)=>d?new Date(d).toLocaleTimeString('en-US',{hour:'2-digit',m
 const formatTime24=(t)=>{if(!t)return'--:--';const[h,m]=t.split(':');return`${h%12||12}:${m} ${h>=12?'PM':'AM'}`};
 const formatDate=(d)=>new Date(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
 const getDateKey=(d=new Date())=>new Date(d).toISOString().split('T')[0];
+
+// FIX: Normalize dates from Google Sheets (handles different formats)
+const normalizeDate=(d)=>{
+  if(!d)return'';
+  if(typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d))return d;
+  try{
+    const date=new Date(d);
+    if(isNaN(date.getTime()))return String(d);
+    return date.toISOString().split('T')[0];
+  }catch(e){return String(d)}
+};
+
 const timeToMin=(t)=>{if(!t)return 0;const[h,m]=t.split(':').map(Number);return h*60+m};
 const calcHours=(s,e)=>s&&e?Math.max(0,(new Date(e)-new Date(s))/3600000):0;
 const getLateMin=(actual,sched)=>{if(!actual||!sched)return 0;const a=new Date(actual);return Math.max(0,(a.getHours()*60+a.getMinutes())-timeToMin(sched))};
 const getAfternoonLateMin=(mOut,aIn)=>{if(!mOut||!aIn)return 0;return Math.max(0,Math.floor((new Date(aIn)-new Date(mOut))/60000-60))};
-const calcPay=(rec,sched,emp,date)=>{const r={basic:0,ot:0,deduct:0,holiday:0,net:0,mLate:0,aLate:0,totalLate:0,workMin:0};if(!sched||sched.type!=='WORK'){if(sched?.type==='VL'){r.basic=emp.hourlyRate*8;r.net=r.basic}return r}if(!rec)return r;const perMin=(emp.hourlyRate*8)/480;const hol=isHoliday(date);const mMin=rec.morningIn&&rec.morningOut?calcHours(rec.morningIn,rec.morningOut)*60:0;const aMin=rec.afternoonIn&&rec.afternoonOut?calcHours(rec.afternoonIn,rec.afternoonOut)*60:0;r.workMin=mMin+aMin;r.mLate=getLateMin(rec.morningIn,sched.morningIn);r.aLate=getAfternoonLateMin(rec.morningOut,rec.afternoonIn);r.totalLate=r.mLate+r.aLate;r.basic=(Math.min(r.workMin,480)/60)*emp.hourlyRate;r.deduct=r.totalLate*perMin;r.ot=(Math.max(0,r.workMin-480)/60)*emp.hourlyRate*1.25;if(hol&&r.workMin>0)r.holiday=hol.type==='regular'?r.basic:r.basic*0.3;r.net=Math.max(0,r.basic+r.ot+r.holiday-r.deduct);return r};
+const calcPay=(rec,sched,emp,date)=>{const r={basic:0,ot:0,deduct:0,holiday:0,net:0,mLate:0,aLate:0,totalLate:0,workMin:0};if(sched&&sched.type!=='WORK'){if(sched?.type==='VL'){r.basic=emp.hourlyRate*8;r.net=r.basic}return r}if(!rec)return r;const perMin=(emp.hourlyRate*8)/480;const hol=isHoliday(date);const mMin=rec.morningIn&&rec.morningOut?calcHours(rec.morningIn,rec.morningOut)*60:0;const aMin=rec.afternoonIn&&rec.afternoonOut?calcHours(rec.afternoonIn,rec.afternoonOut)*60:0;r.workMin=mMin+aMin;if(sched){r.mLate=getLateMin(rec.morningIn,sched.morningIn);r.aLate=getAfternoonLateMin(rec.morningOut,rec.afternoonIn);r.totalLate=r.mLate+r.aLate}r.basic=(Math.min(r.workMin,480)/60)*emp.hourlyRate;r.deduct=r.totalLate*perMin;r.ot=(Math.max(0,r.workMin-480)/60)*emp.hourlyRate*1.25;if(hol&&r.workMin>0)r.holiday=hol.type==='regular'?r.basic:r.basic*0.3;r.net=Math.max(0,r.basic+r.ot+r.holiday-r.deduct);return r};
 const getMonthData=(year,month)=>{const firstDay=new Date(year,month,1).getDay();const daysInMonth=new Date(year,month+1,0).getDate();return{firstDay,daysInMonth}};
 const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
 
@@ -206,11 +218,47 @@ const LoadingScreen=()=><div className="loading-screen"><div className="loading-
 const SyncIndicator=({status})=><div className={`sync-indicator ${status}`}><div className={`sync-dot ${status}`}/>{status==='syncing'?'Syncing...':status==='synced'?'Synced':'Offline'}</div>;
 const TimeButton=({label,time,onClick,disabled,isLate,lateMin,hasLoc})=><button className={`btn-time ${time?(isLate?'late':'recorded'):''}`} onClick={onClick} disabled={disabled}><span className="time-value">{time?formatTime(time):'--:--'}</span><span className="time-label">{label}</span>{time&&isLate&&<span className="badge late-badge">LATE {lateMin}m</span>}{time&&hasLoc&&<span className="badge loc-badge">📍</span>}</button>;
 
-const ScheduleCalendar=({schedules,year,month,selectedDate,onDayClick})=>{const{firstDay,daysInMonth}=getMonthData(year,month);const today=getDateKey();const days=[];for(let i=0;i<firstDay;i++)days.push(<div key={`e${i}`} className="calendar-day empty"/>);for(let d=1;d<=daysInMonth;d++){const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const sc=schedules.find(s=>s.date===ds);const isToday=ds===today;const isSel=ds===selectedDate;days.push(<div key={d} className={`calendar-day ${isToday?'today':''} ${isSel?'selected':''} ${sc?'has-schedule':''} ${sc&&sc.type!=='WORK'?'rest':''}`} onClick={()=>onDayClick&&onDayClick(ds)}><div className="day-num">{d}</div>{sc&&sc.type==='WORK'&&<><div className="day-info">{formatTime24(sc.morningIn)}</div><div className="day-branch">{sc.branch||''}</div></>}{sc&&sc.type!=='WORK'&&<div className="day-type">{sc.type}</div>}</div>)}return<div className="calendar"><div className="calendar-weekdays">{['S','M','T','W','T','F','S'].map((d,i)=><span key={i}>{d}</span>)}</div><div className="calendar-days">{days}</div></div>};
+const ScheduleCalendar=({schedules,year,month,selectedDate,onDayClick})=>{const{firstDay,daysInMonth}=getMonthData(year,month);const today=getDateKey();const days=[];for(let i=0;i<firstDay;i++)days.push(<div key={`e${i}`} className="calendar-day empty"/>);for(let d=1;d<=daysInMonth;d++){const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const sc=schedules.find(s=>normalizeDate(s.date)===ds);const isToday=ds===today;const isSel=ds===selectedDate;days.push(<div key={d} className={`calendar-day ${isToday?'today':''} ${isSel?'selected':''} ${sc?'has-schedule':''} ${sc&&sc.type!=='WORK'?'rest':''}`} onClick={()=>onDayClick&&onDayClick(ds)}><div className="day-num">{d}</div>{sc&&sc.type==='WORK'&&<><div className="day-info">{formatTime24(sc.morningIn)}</div><div className="day-branch">{sc.branch||''}</div></>}{sc&&sc.type!=='WORK'&&<div className="day-type">{sc.type}</div>}</div>)}return<div className="calendar"><div className="calendar-weekdays">{['S','M','T','W','T','F','S'].map((d,i)=><span key={i}>{d}</span>)}</div><div className="calendar-days">{days}</div></div>};
 
-const Dashboard=({employee,attendance,schedules,onRecordTime,onLogout,syncStatus})=>{const[now,setNow]=useState(new Date());const today=getDateKey();useEffect(()=>{const t=setInterval(()=>setNow(new Date()),1000);return()=>clearInterval(t)},[]);const rec=attendance.find(a=>a.empId===employee.id&&a.date===today)||{};const sched=schedules.find(s=>s.empId===employee.id&&s.date===today);const hol=isHoliday(today);const pay=calcPay(rec,sched,employee,today);const history=attendance.filter(a=>a.empId===employee.id).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,10);
-if(sched&&sched.type!=='WORK'){const types={REST:['😴','Rest Day'],VL:['🏖️','Vacation Leave'],LWOP:['📋','LWOP'],SUSPENSION:['⚠️','Suspension']};const[icon,title]=types[sched.type]||['📅',sched.type];return<div className="app-container"><SyncIndicator status={syncStatus}/><div className="header"><h1>TimeTrack</h1><button className="btn btn-secondary btn-small" onClick={onLogout}>Logout</button></div><div className="page-content"><div className="time-display"><div className="date">{formatDate(now)}</div><div className="time">{now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false})}</div><div className="rest-notice"><div className="icon">{icon}</div><div className="title">{title}</div></div></div></div></div>}
-return<div className="app-container"><SyncIndicator status={syncStatus}/><div className="header"><h1>TimeTrack</h1><button className="btn btn-secondary btn-small" onClick={onLogout}>Logout</button></div><div className="page-content"><div className="time-display"><div className="date">{formatDate(now)}</div><div className="time">{now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false})}</div>{sched?<div className="schedule-info"><div className="schedule-item"><div className="label">Time In</div><div className="value">{formatTime24(sched.morningIn)}</div></div><div className="schedule-item"><div className="label">Branch</div><div className="value">{sched.branch||'N/A'}</div></div><div className="schedule-item"><div className="label">Rate</div><div className="value">₱{employee.hourlyRate}/hr</div></div></div>:<div className="no-schedule">⚠️ No schedule today</div>}{hol&&<div style={{marginTop:14,padding:12,background:'rgba(255,170,0,0.1)',borderRadius:10,textAlign:'center',fontSize:'.85rem'}}><span style={{color:'var(--accent-warning)'}}>{hol.name}</span><span style={{marginLeft:8,color:'var(--accent-pink)'}}>{hol.type==='regular'?'200%':'130%'}</span></div>}</div><div className="time-section"><h3>Morning</h3><div className="time-buttons"><TimeButton label="Time In" time={rec.morningIn} onClick={()=>onRecordTime('morningIn')} disabled={!!rec.morningIn||!sched} isLate={pay.mLate>0} lateMin={pay.mLate} hasLoc={rec.morningInLat}/><TimeButton label="Time Out" time={rec.morningOut} onClick={()=>onRecordTime('morningOut')} disabled={!rec.morningIn||!!rec.morningOut}/></div></div><div className="time-section"><h3>Afternoon</h3><div className="time-buttons"><TimeButton label="Time In" time={rec.afternoonIn} onClick={()=>onRecordTime('afternoonIn')} disabled={!!rec.afternoonIn||!rec.morningOut} isLate={pay.aLate>0} lateMin={pay.aLate} hasLoc={rec.afternoonInLat}/><TimeButton label="Time Out" time={rec.afternoonOut} onClick={()=>onRecordTime('afternoonOut')} disabled={!rec.afternoonIn||!!rec.afternoonOut}/></div></div><div className="time-section"><h3>Today's Summary</h3><div className="summary-grid"><div className="summary-card"><div className="value">{(pay.workMin/60).toFixed(1)}</div><div className="label">Hours</div></div><div className="summary-card late"><div className="value">{pay.totalLate}</div><div className="label">Late</div></div><div className="summary-card pay"><div className="value">₱{pay.net.toFixed(0)}</div><div className="label">Net</div></div></div></div>{history.length>0&&<div className="time-section"><h3>Recent</h3><div className="history-list">{history.map(r=>{const s=schedules.find(x=>x.empId===employee.id&&x.date===r.date);const p=calcPay(r,s,employee,r.date);return<div key={r.date} className="history-item"><div><div className="date">{r.date}</div><div className="hours">{(p.workMin/60).toFixed(1)}hrs</div></div><div className="pay">₱{p.net.toFixed(0)}</div></div>})}</div></div>}</div></div>};
+const Dashboard=({employee,attendance,schedules,onRecordTime,onLogout,syncStatus})=>{
+const[now,setNow]=useState(new Date());
+const today=getDateKey();
+useEffect(()=>{const t=setInterval(()=>setNow(new Date()),1000);return()=>clearInterval(t)},[]);
+
+const rec=attendance.find(a=>a.empId===employee.id&&normalizeDate(a.date)===today)||{};
+const sched=schedules.find(s=>s.empId===employee.id&&normalizeDate(s.date)===today);
+const hol=isHoliday(today);
+const pay=calcPay(rec,sched,employee,today);
+const history=attendance.filter(a=>a.empId===employee.id).sort((a,b)=>normalizeDate(b.date).localeCompare(normalizeDate(a.date))).slice(0,10);
+
+// Check if it's a non-work schedule (REST, VL, etc.)
+if(sched&&sched.type!=='WORK'){
+  const types={REST:['😴','Rest Day'],VL:['🏖️','Vacation Leave'],LWOP:['📋','LWOP'],SUSPENSION:['⚠️','Suspension']};
+  const[icon,title]=types[sched.type]||['📅',sched.type];
+  return<div className="app-container"><SyncIndicator status={syncStatus}/><div className="header"><h1>TimeTrack</h1><button className="btn btn-secondary btn-small" onClick={onLogout}>Logout</button></div><div className="page-content"><div className="time-display"><div className="date">{formatDate(now)}</div><div className="time">{now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false})}</div><div className="rest-notice"><div className="icon">{icon}</div><div className="title">{title}</div></div></div></div></div>
+}
+
+// Normal work day OR no schedule (can still clock in)
+return<div className="app-container"><SyncIndicator status={syncStatus}/><div className="header"><h1>TimeTrack</h1><button className="btn btn-secondary btn-small" onClick={onLogout}>Logout</button></div><div className="page-content"><div className="time-display"><div className="date">{formatDate(now)}</div><div className="time">{now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false})}</div>
+{sched?<div className="schedule-info"><div className="schedule-item"><div className="label">Time In</div><div className="value">{formatTime24(sched.morningIn)}</div></div><div className="schedule-item"><div className="label">Branch</div><div className="value">{sched.branch||'N/A'}</div></div><div className="schedule-item"><div className="label">Rate</div><div className="value">₱{employee.hourlyRate}/hr</div></div></div>
+:<div className="no-schedule-notice">📋 No schedule assigned - You can still clock in</div>}
+{hol&&<div style={{marginTop:14,padding:12,background:'rgba(255,170,0,0.1)',borderRadius:10,textAlign:'center',fontSize:'.85rem'}}><span style={{color:'var(--accent-warning)'}}>{hol.name}</span><span style={{marginLeft:8,color:'var(--accent-pink)'}}>{hol.type==='regular'?'200%':'130%'}</span></div>}
+</div>
+
+<div className="time-section"><h3>Morning</h3><div className="time-buttons">
+<TimeButton label="Time In" time={rec.morningIn} onClick={()=>onRecordTime('morningIn')} disabled={!!rec.morningIn} isLate={pay.mLate>0} lateMin={pay.mLate} hasLoc={rec.morningInLat}/>
+<TimeButton label="Time Out" time={rec.morningOut} onClick={()=>onRecordTime('morningOut')} disabled={!rec.morningIn||!!rec.morningOut}/>
+</div></div>
+
+<div className="time-section"><h3>Afternoon</h3><div className="time-buttons">
+<TimeButton label="Time In" time={rec.afternoonIn} onClick={()=>onRecordTime('afternoonIn')} disabled={!!rec.afternoonIn||!rec.morningOut} isLate={pay.aLate>0} lateMin={pay.aLate} hasLoc={rec.afternoonInLat}/>
+<TimeButton label="Time Out" time={rec.afternoonOut} onClick={()=>onRecordTime('afternoonOut')} disabled={!rec.afternoonIn||!!rec.afternoonOut}/>
+</div></div>
+
+<div className="time-section"><h3>Today's Summary</h3><div className="summary-grid"><div className="summary-card"><div className="value">{(pay.workMin/60).toFixed(1)}</div><div className="label">Hours</div></div><div className="summary-card late"><div className="value">{pay.totalLate}</div><div className="label">Late</div></div><div className="summary-card pay"><div className="value">₱{pay.net.toFixed(0)}</div><div className="label">Net</div></div></div></div>
+
+{history.length>0&&<div className="time-section"><h3>Recent</h3><div className="history-list">{history.map(r=>{const s=schedules.find(x=>x.empId===employee.id&&normalizeDate(x.date)===normalizeDate(r.date));const p=calcPay(r,s,employee,normalizeDate(r.date));return<div key={normalizeDate(r.date)} className="history-item"><div><div className="date">{normalizeDate(r.date)}</div><div className="hours">{(p.workMin/60).toFixed(1)}hrs</div></div><div className="pay">₱{p.net.toFixed(0)}</div></div>})}</div></div>}
+</div></div>};
 
 const AdminPanel=({employees,attendance,schedules,branches,onAddEmployee,onSetSchedule,onUpdateStatus,onAddBranch,onDeleteBranch,onLogout,syncStatus})=>{
 const[tab,setTab]=useState('home');
@@ -236,10 +284,12 @@ const showToast=(m)=>{setToast(m);setTimeout(()=>setToast(''),2500)};
 const today=getDateKey();
 const activeEmps=employees.filter(e=>(e.status||'Active')==='Active');
 const filteredEmps=employees.filter(e=>{const s=(e.status||'Active').toLowerCase();if(empFilter==='all')return true;return s===empFilter});
-const todayScheds=schedules.filter(s=>s.date===today);
+
+// FIX: Use normalizeDate for filtering schedules
+const todayScheds=schedules.filter(s=>normalizeDate(s.date)===today);
 const workingToday=todayScheds.filter(s=>s.type==='WORK');
-const presentToday=attendance.filter(a=>a.date===today&&a.morningIn);
-const totalHoursToday=presentToday.reduce((sum,a)=>{const e=employees.find(x=>x.id===a.empId);const s=schedules.find(x=>x.empId===a.empId&&x.date===today);if(!e)return sum;const p=calcPay(a,s,e,today);return sum+p.workMin/60},0);
+const presentToday=attendance.filter(a=>normalizeDate(a.date)===today&&a.morningIn);
+const totalHoursToday=presentToday.reduce((sum,a)=>{const e=employees.find(x=>x.id===a.empId);const s=schedules.find(x=>x.empId===a.empId&&normalizeDate(x.date)===today);if(!e)return sum;const p=calcPay(a,s,e,today);return sum+p.workMin/60},0);
 
 const handleAddEmp=async()=>{if(!newEmp.name||!newEmp.hourlyRate)return;await onAddEmployee({...newEmp,status:'Active'});setNewEmp({name:'',position:'',hourlyRate:'',dateHired:'',address:'',sss:'',philhealth:'',pagibig:'',phone:''});setShowAddEmp(false);showToast('Employee added!')};
 const handleStatusChange=async(id,status)=>{await onUpdateStatus(id,status);showToast('Status updated!')};
@@ -247,7 +297,7 @@ const prevMonth=()=>{if(calMonth===0){setCalMonth(11);setCalYear(calYear-1)}else
 const nextMonth=()=>{if(calMonth===11){setCalMonth(0);setCalYear(calYear+1)}else setCalMonth(calMonth+1)};
 const aPrevMonth=()=>{if(aCalMonth===0){setACalMonth(11);setACalYear(aCalYear-1)}else setACalMonth(aCalMonth-1)};
 const aNextMonth=()=>{if(aCalMonth===11){setACalMonth(0);setACalYear(aCalYear+1)}else setACalMonth(aCalMonth+1)};
-const handleDaySelect=(d)=>{setSelectedDay(d);const ex=assignEmp?schedules.find(s=>s.empId===assignEmp.id&&s.date===d):null;if(ex){setAssignType(ex.type);setAssignTime(ex.morningIn||'08:00');setAssignBranch(ex.branch||branches[0]?.name||'')}else{setAssignType('WORK');setAssignTime('08:00');setAssignBranch(branches[0]?.name||'')}};
+const handleDaySelect=(d)=>{setSelectedDay(d);const ex=assignEmp?schedules.find(s=>s.empId===assignEmp.id&&normalizeDate(s.date)===d):null;if(ex){setAssignType(ex.type);setAssignTime(ex.morningIn||'08:00');setAssignBranch(ex.branch||branches[0]?.name||'')}else{setAssignType('WORK');setAssignTime('08:00');setAssignBranch(branches[0]?.name||'')}};
 const handleSaveSchedule=async()=>{if(!assignEmp||!selectedDay)return;await onSetSchedule({empId:assignEmp.id,date:selectedDay,type:assignType,morningIn:assignType==='WORK'?assignTime:'',branch:assignType==='WORK'?assignBranch:''});showToast('Schedule saved!');setSelectedDay(null)};
 const handleAddBranch=async()=>{if(!newBranchName)return;await onAddBranch({name:newBranchName,address:newBranchAddr});setNewBranchName('');setNewBranchAddr('');showToast('Branch added!')};
 
@@ -265,7 +315,7 @@ return<div className="app-container">
 </div>
 <div className="section-title">Today's Schedule</div>
 <div className="today-list">
-{activeEmps.map(emp=>{const sc=todayScheds.find(s=>s.empId===emp.id);const att=attendance.find(a=>a.empId===emp.id&&a.date===today);return<div key={emp.id} className="today-item"><div className="emp-info"><div className="name">{emp.name}</div>{sc&&sc.type==='WORK'?<div className="branch">📍 {sc.branch||'No branch'}</div>:<div className="branch">{sc?sc.type:'No schedule'}</div>}</div>{sc&&sc.type==='WORK'?<div className="time">{att?.morningIn?'✅ Present':formatTime24(sc.morningIn)}</div>:<div className="no-sched">{sc?.type||'—'}</div>}</div>})}
+{activeEmps.map(emp=>{const sc=todayScheds.find(s=>s.empId===emp.id);const att=attendance.find(a=>a.empId===emp.id&&normalizeDate(a.date)===today);return<div key={emp.id} className="today-item"><div className="emp-info"><div className="name">{emp.name}</div>{sc&&sc.type==='WORK'?<div className="branch">📍 {sc.branch||'No branch'}</div>:<div className="branch">{sc?sc.type:'No schedule'}</div>}</div>{sc&&sc.type==='WORK'?<div className="time">{att?.morningIn?'✅ Present':formatTime24(sc.morningIn)}</div>:<div className="no-sched">{sc?.type||'—'}</div>}</div>})}
 {activeEmps.length===0&&<div className="empty-state"><div className="icon">👥</div><p>No active employees</p></div>}
 </div>
 <div className="section-title" style={{marginTop:24}}>Branches</div>
