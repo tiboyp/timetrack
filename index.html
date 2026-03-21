@@ -12,6 +12,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root{--bg-dark:#0a0a0f;--bg-card:#12121a;--bg-elevated:#1a1a24;--accent-primary:#00ff88;--accent-secondary:#00ccff;--accent-warning:#ffaa00;--accent-danger:#ff4466;--accent-purple:#aa66ff;--accent-pink:#ff66aa;--text-primary:#fff;--text-secondary:#8888aa;--text-muted:#555566;--border-color:#2a2a3a;--gradient-accent:linear-gradient(135deg,#00ff88 0%,#00ccff 100%);--gradient-purple:linear-gradient(135deg,#aa66ff 0%,#6644ff 100%);--safe-top:env(safe-area-inset-top);--safe-bottom:env(safe-area-inset-bottom)}
@@ -44,15 +45,16 @@
     .btn-primary{background:var(--gradient-accent);color:var(--bg-dark)}
     .btn-secondary{background:var(--bg-elevated);color:var(--text-primary);border:2px solid var(--border-color)}
     .btn-danger{background:rgba(255,68,102,.2);color:var(--accent-danger);border:1px solid var(--accent-danger)}
+    .btn-success{background:rgba(0,255,136,.2);color:var(--accent-primary);border:1px solid var(--accent-primary)}
     .btn-small{padding:8px 14px;font-size:.7rem}
     .header{display:flex;justify-content:space-between;align-items:center;padding:16px;background:var(--bg-card);border-bottom:1px solid var(--border-color);position:sticky;top:0;z-index:50}
     .header h1{font-family:'Space Mono',monospace;font-size:1rem;background:var(--gradient-accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .header-badge{font-size:.6rem;background:var(--accent-warning);color:var(--bg-dark);padding:3px 8px;border-radius:10px;margin-left:8px}
     .page-content{padding:16px}
     .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg-card);border-top:1px solid var(--border-color);display:flex;padding:8px 0;padding-bottom:calc(8px + var(--safe-bottom));z-index:100}
-    .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px;color:var(--text-muted);font-size:.6rem;text-transform:uppercase;letter-spacing:.5px;background:none;border:none;cursor:pointer}
+    .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px;color:var(--text-muted);font-size:.55rem;text-transform:uppercase;letter-spacing:.5px;background:none;border:none;cursor:pointer}
     .nav-item.active{color:var(--accent-primary)}
-    .nav-item .nav-icon{font-size:1.3rem}
+    .nav-item .nav-icon{font-size:1.2rem}
     .stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
     .stat-card{background:var(--bg-card);border-radius:16px;padding:20px;text-align:center}
     .stat-card .stat-value{font-family:'Space Mono',monospace;font-size:1.8rem;font-weight:700;background:var(--gradient-accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -82,7 +84,7 @@
     .modal{background:var(--bg-card);border-radius:24px 24px 0 0;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
     .modal-header{display:flex;justify-content:space-between;align-items:center;padding:20px;border-bottom:1px solid var(--border-color);position:sticky;top:0;background:var(--bg-card);z-index:1}
     .modal-header h2{font-size:1rem}
-    .modal-close{background:none;border:none;color:var(--text-secondary);font-size:1.5rem;padding:0 10px}
+    .modal-close{background:none;border:none;color:var(--text-secondary);font-size:1.5rem;padding:0 10px;cursor:pointer}
     .modal-body{padding:20px}
     .calendar{background:var(--bg-elevated);border-radius:14px;padding:16px}
     .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
@@ -107,7 +109,7 @@
     .schedule-types{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
     .schedule-type-btn{padding:10px 16px;background:var(--bg-card);border:2px solid var(--border-color);border-radius:10px;color:var(--text-secondary);font-size:.8rem;cursor:pointer}
     .schedule-type-btn.active{border-color:var(--accent-primary);color:var(--accent-primary);background:rgba(0,255,136,.1)}
-    .emp-select-list{display:flex;flex-direction:column;gap:8px}
+    .emp-select-list{display:flex;flex-direction:column;gap:8px;max-height:200px;overflow-y:auto}
     .emp-select-item{background:var(--bg-elevated);border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
     .emp-select-item.selected{background:rgba(0,255,136,.1);border:1px solid var(--accent-primary)}
     .emp-select-item .name{font-weight:500}
@@ -177,229 +179,241 @@
     .history-item .date{font-family:'Space Mono',monospace;font-size:.8rem}
     .history-item .hours{font-size:.75rem;color:var(--text-secondary)}
     .history-item .pay{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--accent-secondary)}
-    .attendance-detail{margin-bottom:20px}
-    .attendance-detail .time-row{display:flex;justify-content:space-between;align-items:center;padding:14px;background:var(--bg-elevated);border-radius:12px;margin-bottom:8px}
-    .attendance-detail .time-row .period{font-size:.7rem;color:var(--text-secondary);text-transform:uppercase}
-    .attendance-detail .time-row .times{display:flex;gap:16px}
-    .attendance-detail .time-row .time-item{text-align:center}
-    .attendance-detail .time-row .time-item .label{font-size:.55rem;color:var(--text-muted);text-transform:uppercase}
-    .attendance-detail .time-row .time-item .value{font-family:'Space Mono',monospace;font-size:.9rem;color:var(--accent-primary)}
-    .map-container{border-radius:12px;overflow:hidden;margin-top:16px;border:1px solid var(--border-color)}
-    .map-container iframe{width:100%;height:200px;border:none}
-    .location-card{background:var(--bg-elevated);border-radius:12px;padding:14px;margin-bottom:10px}
-    .location-card h4{font-size:.75rem;color:var(--text-secondary);margin-bottom:10px;text-transform:uppercase}
-    .location-card .coords{font-family:'Space Mono',monospace;font-size:.75rem;color:var(--accent-secondary);margin-bottom:10px}
-    .location-card a{display:inline-block;padding:8px 14px;background:var(--gradient-accent);color:var(--bg-dark);border-radius:8px;font-size:.75rem;font-weight:600;text-decoration:none}
-    .no-location{color:var(--text-muted);font-size:.8rem;text-align:center;padding:20px}
-    .attendance-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
-    .attendance-summary .sum-card{background:var(--bg-elevated);border-radius:12px;padding:14px;text-align:center}
-    .attendance-summary .sum-card .value{font-family:'Space Mono',monospace;font-size:1.2rem;font-weight:700;color:var(--accent-primary)}
-    .attendance-summary .sum-card .label{font-size:.6rem;color:var(--text-secondary);margin-top:4px;text-transform:uppercase}
-    .attendance-summary .sum-card.pay .value{color:var(--accent-secondary)}
-    @media(max-width:380px){.time-display .time{font-size:2.5rem}.stat-grid{grid-template-columns:1fr}.summary-grid{grid-template-columns:repeat(2,1fr)}}
+    .payroll-emp-list{display:flex;flex-direction:column;gap:10px}
+    .payroll-emp-item{background:var(--bg-elevated);border-radius:14px;padding:16px;cursor:pointer;transition:all .2s;display:flex;justify-content:space-between;align-items:center}
+    .payroll-emp-item:active{transform:scale(.99)}
+    .payroll-emp-item .emp-info .name{font-weight:600;font-size:.95rem}
+    .payroll-emp-item .emp-info .position{font-size:.7rem;color:var(--text-secondary);margin-top:2px}
+    .payroll-emp-item .emp-rate{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--accent-primary)}
+    .payroll-summary{background:var(--bg-elevated);border-radius:16px;padding:20px;margin-bottom:20px}
+    .payroll-summary h3{font-size:.8rem;color:var(--accent-secondary);margin-bottom:16px;text-transform:uppercase;text-align:center}
+    .payroll-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .payroll-stat{background:var(--bg-card);border-radius:12px;padding:14px;text-align:center}
+    .payroll-stat .value{font-family:'Space Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--accent-primary)}
+    .payroll-stat .label{font-size:.6rem;color:var(--text-secondary);margin-top:4px;text-transform:uppercase}
+    .payroll-stat.warning .value{color:var(--accent-warning)}
+    .payroll-stat.danger .value{color:var(--accent-danger)}
+    .payroll-stat.info .value{color:var(--accent-secondary)}
+    .payroll-stat.highlight{grid-column:span 2;background:rgba(0,255,136,.1);border:1px solid var(--accent-primary)}
+    .payroll-stat.highlight .value{font-size:1.8rem}
+    .date-range-picker{background:var(--bg-card);border-radius:16px;padding:20px;margin-bottom:20px}
+    .date-range-picker h4{font-size:.75rem;color:var(--text-secondary);margin-bottom:12px;text-transform:uppercase}
+    .payroll-table{width:100%;border-collapse:collapse;font-size:.75rem;margin-top:16px}
+    .payroll-table th,.payroll-table td{padding:10px 6px;text-align:left;border-bottom:1px solid var(--border-color)}
+    .payroll-table th{color:var(--text-secondary);font-weight:500;text-transform:uppercase;font-size:.65rem}
+    .payroll-table td{font-family:'Space Mono',monospace}
+    .payroll-table .text-right{text-align:right}
+    .payroll-table .total-row{background:var(--bg-elevated);font-weight:700}
+    .payroll-table .total-row td{color:var(--accent-primary)}
+    .export-section{display:flex;gap:10px;margin-top:20px}
+    .export-section .btn{flex:1}
+    @media(max-width:380px){.time-display .time{font-size:2.5rem}.stat-grid{grid-template-columns:1fr}.summary-grid{grid-template-columns:repeat(2,1fr)}.payroll-stats{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const{useState,useEffect}=React;
+const{useState,useEffect,useMemo}=React;
 
 const ADMIN_PASSWORD='Albert14$';
 const getApiUrl=()=>localStorage.getItem('timetrack_api_url')||'';
 const api={async call(action,params={},postData=null){const url=new URL(getApiUrl());url.searchParams.set('action',action);Object.entries(params).forEach(([k,v])=>{if(v)url.searchParams.set(k,v)});const options={method:postData?'POST':'GET'};if(postData)options.body=JSON.stringify(postData);const response=await fetch(url.toString(),options);return response.json()}};
 
 const getHolidays=(year)=>{const h={regular:[],special:[]};h.regular.push({date:`${year}-01-01`,name:"New Year"},{date:`${year}-04-09`,name:"Araw ng Kagitingan"},{date:`${year}-05-01`,name:"Labor Day"},{date:`${year}-06-12`,name:"Independence"},{date:`${year}-11-30`,name:"Bonifacio Day"},{date:`${year}-12-25`,name:"Christmas"},{date:`${year}-12-30`,name:"Rizal Day"});h.special.push({date:`${year}-08-21`,name:"Ninoy Aquino"},{date:`${year}-11-01`,name:"All Saints"},{date:`${year}-12-31`,name:"New Year's Eve"});return h};
-const isHoliday=(d)=>{const y=parseInt(d.split('-')[0]);const h=getHolidays(y);const r=h.regular.find(x=>x.date===d);const s=h.special.find(x=>x.date===d);if(r)return{type:'regular',name:r.name};if(s)return{type:'special',name:s.name};return null};
+const isHoliday=(d)=>{if(!d)return null;const y=parseInt(d.split('-')[0]);const h=getHolidays(y);const r=h.regular.find(x=>x.date===d);const s=h.special.find(x=>x.date===d);if(r)return{type:'regular',name:r.name};if(s)return{type:'special',name:s.name};return null};
 
-const formatTime=(d)=>{
-  if(!d)return'--:--';
-  try{
-    const date=new Date(d);
-    if(isNaN(date.getTime()))return'--:--';
-    return date.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
-  }catch(e){return'--:--'}
-};
-
-const formatTime24=(t)=>{
-  if(!t)return'--:--';
-  if(typeof t==='string'){
-    if(t.includes(':')){
-      const parts=t.split(':');
-      const h=parseInt(parts[0],10);
-      const m=parts[1]||'00';
-      if(isNaN(h))return'--:--';
-      const hour=h%12||12;
-      const ampm=h>=12?'PM':'AM';
-      return`${hour}:${m.toString().padStart(2,'0')} ${ampm}`;
-    }
-  }
-  try{
-    const date=new Date(t);
-    if(!isNaN(date.getTime())){
-      const h=date.getHours();
-      const m=date.getMinutes();
-      const hour=h%12||12;
-      const ampm=h>=12?'PM':'AM';
-      return`${hour}:${String(m).padStart(2,'0')} ${ampm}`;
-    }
-  }catch(e){}
-  return'--:--';
-};
-
+const formatTime=(d)=>{if(!d)return'--:--';try{const date=new Date(d);if(isNaN(date.getTime()))return'--:--';return date.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})}catch(e){return'--:--'}};
+const formatTimeExcel=(d)=>{if(!d)return'';try{const date=new Date(d);if(isNaN(date.getTime()))return'';return date.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true})}catch(e){return''}};
+const formatTime24=(t)=>{if(!t)return'--:--';if(typeof t==='string'){if(t.includes(':')){const parts=t.split(':');const h=parseInt(parts[0],10);const m=parts[1]||'00';if(isNaN(h))return'--:--';const hour=h%12||12;const ampm=h>=12?'PM':'AM';return`${hour}:${m.toString().padStart(2,'0')} ${ampm}`}}try{const date=new Date(t);if(!isNaN(date.getTime())){const h=date.getHours();const m=date.getMinutes();const hour=h%12||12;const ampm=h>=12?'PM':'AM';return`${hour}:${String(m).padStart(2,'0')} ${ampm}`}}catch(e){}return'--:--'};
 const formatDate=(d)=>new Date(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
 const formatDateLong=(d)=>new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+const formatDateShort=(d)=>new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+const formatDateExcel=(d)=>new Date(d+'T12:00:00').toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
 
-const getDateKey=(d=new Date())=>{
-  const date=d instanceof Date?d:new Date(d);
-  const year=date.getFullYear();
-  const month=String(date.getMonth()+1).padStart(2,'0');
-  const day=String(date.getDate()).padStart(2,'0');
-  return`${year}-${month}-${day}`;
-};
+const getDateKey=(d=new Date())=>{const date=d instanceof Date?d:new Date(d);const year=date.getFullYear();const month=String(date.getMonth()+1).padStart(2,'0');const day=String(date.getDate()).padStart(2,'0');return`${year}-${month}-${day}`};
+const normalizeDate=(d)=>{if(!d)return'';if(typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d))return d;try{const date=new Date(d);if(isNaN(date.getTime()))return String(d);const year=date.getFullYear();const month=String(date.getMonth()+1).padStart(2,'0');const day=String(date.getDate()).padStart(2,'0');return`${year}-${month}-${day}`}catch(e){return String(d)}};
+const getDateRange=(start,end)=>{const dates=[];let current=new Date(start+'T12:00:00');const endDate=new Date(end+'T12:00:00');while(current<=endDate){dates.push(getDateKey(current));current.setDate(current.getDate()+1)}return dates};
+const getLast7Days=()=>{const dates=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);dates.push(getDateKey(d))}return dates};
 
-const normalizeDate=(d)=>{
-  if(!d)return'';
-  if(typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d))return d;
-  try{
-    const date=new Date(d);
-    if(isNaN(date.getTime()))return String(d);
-    const year=date.getFullYear();
-    const month=String(date.getMonth()+1).padStart(2,'0');
-    const day=String(date.getDate()).padStart(2,'0');
-    return`${year}-${month}-${day}`;
-  }catch(e){return String(d)}
-};
-
-const timeToMin=(t)=>{
-  if(!t)return 0;
-  if(typeof t==='string'&&t.includes(':')){
-    const[h,m]=t.split(':').map(Number);
-    return h*60+(m||0);
-  }
-  try{
-    const date=new Date(t);
-    if(!isNaN(date.getTime())){
-      return date.getHours()*60+date.getMinutes();
-    }
-  }catch(e){}
-  return 0;
-};
-
+const timeToMin=(t)=>{if(!t)return 0;if(typeof t==='string'&&t.includes(':')){const[h,m]=t.split(':').map(Number);return h*60+(m||0)}try{const date=new Date(t);if(!isNaN(date.getTime()))return date.getHours()*60+date.getMinutes()}catch(e){}return 0};
 const calcHours=(s,e)=>s&&e?Math.max(0,(new Date(e)-new Date(s))/3600000):0;
 const getLateMin=(actual,sched)=>{if(!actual||!sched)return 0;const a=new Date(actual);return Math.max(0,(a.getHours()*60+a.getMinutes())-timeToMin(sched))};
 const getAfternoonLateMin=(mOut,aIn)=>{if(!mOut||!aIn)return 0;return Math.max(0,Math.floor((new Date(aIn)-new Date(mOut))/60000-60))};
-const calcPay=(rec,sched,emp,date)=>{const r={basic:0,ot:0,deduct:0,holiday:0,net:0,mLate:0,aLate:0,totalLate:0,workMin:0};if(sched&&sched.type!=='WORK'){if(sched?.type==='VL'){r.basic=emp.hourlyRate*8;r.net=r.basic}return r}if(!rec)return r;const perMin=(emp.hourlyRate*8)/480;const hol=isHoliday(date);const mMin=rec.morningIn&&rec.morningOut?calcHours(rec.morningIn,rec.morningOut)*60:0;const aMin=rec.afternoonIn&&rec.afternoonOut?calcHours(rec.afternoonIn,rec.afternoonOut)*60:0;r.workMin=mMin+aMin;if(sched){r.mLate=getLateMin(rec.morningIn,sched.morningIn);r.aLate=getAfternoonLateMin(rec.morningOut,rec.afternoonIn);r.totalLate=r.mLate+r.aLate}r.basic=(Math.min(r.workMin,480)/60)*emp.hourlyRate;r.deduct=r.totalLate*perMin;r.ot=(Math.max(0,r.workMin-480)/60)*emp.hourlyRate*1.25;if(hol&&r.workMin>0)r.holiday=hol.type==='regular'?r.basic:r.basic*0.3;r.net=Math.max(0,r.basic+r.ot+r.holiday-r.deduct);return r};
+const calcPay=(rec,sched,emp,date)=>{const r={basic:0,ot:0,deduct:0,holiday:0,net:0,mLate:0,aLate:0,totalLate:0,workMin:0,otMin:0};if(!emp)return r;if(sched&&sched.type!=='WORK'){if(sched?.type==='VL'){r.basic=emp.hourlyRate*8;r.net=r.basic}return r}if(!rec)return r;const perMin=(emp.hourlyRate*8)/480;const hol=isHoliday(date);const mMin=rec.morningIn&&rec.morningOut?calcHours(rec.morningIn,rec.morningOut)*60:0;const aMin=rec.afternoonIn&&rec.afternoonOut?calcHours(rec.afternoonIn,rec.afternoonOut)*60:0;r.workMin=mMin+aMin;r.otMin=Math.max(0,r.workMin-480);if(sched){r.mLate=getLateMin(rec.morningIn,sched.morningIn);r.aLate=getAfternoonLateMin(rec.morningOut,rec.afternoonIn);r.totalLate=r.mLate+r.aLate}r.basic=(Math.min(r.workMin,480)/60)*emp.hourlyRate;r.deduct=r.totalLate*perMin;r.ot=(r.otMin/60)*emp.hourlyRate*1.25;if(hol&&r.workMin>0)r.holiday=hol.type==='regular'?r.basic:r.basic*0.3;r.net=Math.max(0,r.basic+r.ot+r.holiday-r.deduct);return r};
 const getMonthData=(year,month)=>{const firstDay=new Date(year,month,1).getDay();const daysInMonth=new Date(year,month+1,0).getDate();return{firstDay,daysInMonth}};
 const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+// Excel Export Function
+const exportPayrollToExcel=(employee,dateFrom,dateTo,payrollData)=>{
+  const wb=XLSX.utils.book_new();
+  const headerInfo=[['PAYROLL REPORT'],[''],['Employee Name:',employee.name],['Employee ID:',employee.id],['Position:',employee.position||''],['Hourly Rate:',`₱${employee.hourlyRate}`],['Period:',`${formatDateExcel(dateFrom)} - ${formatDateExcel(dateTo)}`],['Generated:',new Date().toLocaleString('en-US'),['']];
+  const columnHeaders=['Date','Day','Schedule Type','Branch','Morning In','Morning Out','Afternoon In','Afternoon Out','Hours Worked','OT Hours','Minutes Late','Basic Pay','OT Pay','Holiday Pay','Deductions','Net Pay'];
+  const dataRows=payrollData.days.map(d=>{const att=d.att||{};const dayName=new Date(d.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short'});return[formatDateExcel(d.date),dayName,d.sched?.type||'No Schedule',d.sched?.branch||'',formatTimeExcel(att.morningIn),formatTimeExcel(att.morningOut),formatTimeExcel(att.afternoonIn),formatTimeExcel(att.afternoonOut),(d.pay.workMin/60).toFixed(2),(d.pay.otMin/60).toFixed(2),d.pay.totalLate,d.pay.basic.toFixed(2),d.pay.ot.toFixed(2),d.pay.holiday.toFixed(2),d.pay.deduct.toFixed(2),d.pay.net.toFixed(2)]});
+  const totalsRow=['TOTALS','','','','','','','',payrollData.totals.hours.toFixed(2),payrollData.totals.otHours.toFixed(2),payrollData.totals.late,payrollData.totals.basic.toFixed(2),payrollData.totals.ot.toFixed(2),payrollData.totals.holiday.toFixed(2),payrollData.totals.deduct.toFixed(2),payrollData.totals.net.toFixed(2)];
+  const summarySection=[[''],['SUMMARY'],['Days Worked:',payrollData.totals.daysWorked],['Total Hours:',payrollData.totals.hours.toFixed(2)],['Overtime Hours:',payrollData.totals.otHours.toFixed(2)],['Total Late (min):',payrollData.totals.late],[''],['Basic Pay:',`₱${payrollData.totals.basic.toFixed(2)}`],['Overtime Pay:',`₱${payrollData.totals.ot.toFixed(2)}`],['Holiday Pay:',`₱${payrollData.totals.holiday.toFixed(2)}`],['Late Deductions:',`-₱${payrollData.totals.deduct.toFixed(2)}`],[''],['NET PAY:',`₱${payrollData.totals.net.toFixed(2)}`]];
+  const wsData=[...headerInfo,columnHeaders,...dataRows,totalsRow,...summarySection];
+  const ws=XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols']=[{wch:12},{wch:6},{wch:12},{wch:15},{wch:12},{wch:12},{wch:12},{wch:12},{wch:10},{wch:10},{wch:10},{wch:12},{wch:10},{wch:12},{wch:12},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,ws,'Payroll');
+  const fileName=`Payroll_${employee.name.replace(/\s+/g,'_')}_${dateFrom}_to_${dateTo}.xlsx`;
+  XLSX.writeFile(wb,fileName);
+};
 
 const SetupScreen=({onSetup})=>{const[url,setUrl]=useState('');const[error,setError]=useState('');const[testing,setTesting]=useState(false);const test=async()=>{setTesting(true);setError('');try{const u=new URL(url);u.searchParams.set('action','getEmployees');const res=await fetch(u.toString());const data=await res.json();if(Array.isArray(data)){localStorage.setItem('timetrack_api_url',url);onSetup()}else setError(data.error||'Invalid')}catch(e){setError('Connection failed')}setTesting(false)};return<div className="setup-screen"><div className="setup-card"><h2>⚙️ Setup TimeTrack</h2><p style={{color:'var(--text-secondary)',marginBottom:16}}>Paste your Google Apps Script URL:</p><div className="input-group"><textarea value={url} onChange={e=>setUrl(e.target.value)} placeholder="https://script.google.com/macros/s/.../exec"/></div>{error&&<p className="error-message">{error}</p>}<button className="btn btn-primary" style={{width:'100%'}} onClick={test} disabled={testing||!url}>{testing?'Testing...':'Connect'}</button></div></div>};
 const LoadingScreen=()=><div className="loading-screen"><div className="loading-spinner"/><p style={{color:'var(--text-secondary)'}}>Loading...</p></div>;
 const SyncIndicator=({status})=><div className={`sync-indicator ${status}`}><div className={`sync-dot ${status}`}/>{status==='syncing'?'Syncing...':status==='synced'?'Synced':'Offline'}</div>;
 const TimeButton=({label,time,onClick,disabled,isLate,lateMin,hasLoc})=><button className={`btn-time ${time?(isLate?'late':'recorded'):''}`} onClick={onClick} disabled={disabled}><span className="time-value">{time?formatTime(time):'--:--'}</span><span className="time-label">{label}</span>{time&&isLate&&<span className="badge late-badge">LATE {lateMin}m</span>}{time&&hasLoc&&<span className="badge loc-badge">📍</span>}</button>;
 
-// Attendance Detail Modal Component
-const AttendanceDetailModal=({employee,date,attendance,schedule,onClose})=>{
-  const att=attendance||{};
-  const sched=schedule;
-  const pay=calcPay(att,sched,employee,date);
-  
-  const hasAnyLocation=att.morningInLat||att.afternoonInLat;
-  
-  // Create Google Maps URL for a location
-  const getMapUrl=(lat,lng)=>`https://www.google.com/maps?q=${lat},${lng}`;
-  
-  // Create embedded map URL (using OpenStreetMap for free embedding)
-  const getEmbedUrl=(lat,lng)=>`https://www.openstreetmap.org/export/embed.html?bbox=${lng-0.005},${lat-0.005},${lng+0.005},${lat+0.005}&layer=mapnik&marker=${lat},${lng}`;
-  
-  return<div className="modal-overlay" onClick={onClose}><div className="modal" onClick={e=>e.stopPropagation()}><div className="modal-header"><h2>📅 Attendance Details</h2><button className="modal-close" onClick={onClose}>×</button></div><div className="modal-body">
-    <div style={{textAlign:'center',marginBottom:20}}>
-      <h3 style={{color:'var(--accent-primary)'}}>{employee.name}</h3>
-      <p style={{color:'var(--text-secondary)',fontSize:'.85rem',marginTop:4}}>{formatDateLong(date)}</p>
-      {sched&&<p style={{marginTop:8}}><span className="status-badge active">{sched.type}</span>{sched.type==='WORK'&&<span style={{marginLeft:8,color:'var(--accent-secondary)',fontSize:'.8rem'}}>📍 {sched.branch||'No branch'}</span>}</p>}
-    </div>
-    
-    {/* Schedule Info */}
-    {sched&&sched.type==='WORK'&&<div className="card" style={{marginBottom:16}}>
-      <div className="detail-row"><span className="label">Scheduled Time In</span><span className="value">{formatTime24(sched.morningIn)}</span></div>
-      <div className="detail-row"><span className="label">Branch</span><span className="value">{sched.branch||'—'}</span></div>
-    </div>}
-    
-    {/* Attendance Times */}
-    <div className="section-title">Clock In/Out</div>
-    <div className="attendance-detail">
-      <div className="time-row">
-        <span className="period">🌅 Morning</span>
-        <div className="times">
-          <div className="time-item"><div className="label">In</div><div className="value">{formatTime(att.morningIn)}</div></div>
-          <div className="time-item"><div className="label">Out</div><div className="value">{formatTime(att.morningOut)}</div></div>
-        </div>
-      </div>
-      <div className="time-row">
-        <span className="period">🌇 Afternoon</span>
-        <div className="times">
-          <div className="time-item"><div className="label">In</div><div className="value">{formatTime(att.afternoonIn)}</div></div>
-          <div className="time-item"><div className="label">Out</div><div className="value">{formatTime(att.afternoonOut)}</div></div>
-        </div>
-      </div>
-    </div>
-    
-    {/* Summary */}
-    <div className="section-title">Summary</div>
-    <div className="attendance-summary">
-      <div className="sum-card"><div className="value">{(pay.workMin/60).toFixed(1)}</div><div className="label">Hours Worked</div></div>
-      <div className="sum-card"><div className="value" style={{color:'var(--accent-danger)'}}>{pay.totalLate}</div><div className="label">Minutes Late</div></div>
-      <div className="sum-card pay"><div className="value">₱{pay.net.toFixed(0)}</div><div className="label">Net Pay</div></div>
-      <div className="sum-card"><div className="value" style={{color:'var(--accent-warning)'}}>₱{pay.deduct.toFixed(0)}</div><div className="label">Deductions</div></div>
-    </div>
-    
-    {/* Location Maps */}
-    <div className="section-title">📍 Clock-In Locations</div>
-    
-    {att.morningInLat&&att.morningInLng?<div className="location-card">
-      <h4>🌅 Morning Clock-In Location</h4>
-      <div className="coords">Lat: {parseFloat(att.morningInLat).toFixed(6)}, Lng: {parseFloat(att.morningInLng).toFixed(6)}</div>
-      <div className="map-container">
-        <iframe src={getEmbedUrl(att.morningInLat,att.morningInLng)} loading="lazy"/>
-      </div>
-      <div style={{marginTop:10}}>
-        <a href={getMapUrl(att.morningInLat,att.morningInLng)} target="_blank" rel="noopener noreferrer">🗺️ Open in Google Maps</a>
-      </div>
-    </div>:<div className="location-card"><h4>🌅 Morning Clock-In Location</h4><p className="no-location">No location data recorded</p></div>}
-    
-    {att.afternoonInLat&&att.afternoonInLng?<div className="location-card">
-      <h4>🌇 Afternoon Clock-In Location</h4>
-      <div className="coords">Lat: {parseFloat(att.afternoonInLat).toFixed(6)}, Lng: {parseFloat(att.afternoonInLng).toFixed(6)}</div>
-      <div className="map-container">
-        <iframe src={getEmbedUrl(att.afternoonInLat,att.afternoonInLng)} loading="lazy"/>
-      </div>
-      <div style={{marginTop:10}}>
-        <a href={getMapUrl(att.afternoonInLat,att.afternoonInLng)} target="_blank" rel="noopener noreferrer">🗺️ Open in Google Maps</a>
-      </div>
-    </div>:<div className="location-card"><h4>🌇 Afternoon Clock-In Location</h4><p className="no-location">No location data recorded</p></div>}
-    
-  </div></div></div>
-};
+const ScheduleCalendar=({schedules,attendance,year,month,selectedDate,onDayClick,showAttendance})=>{const{firstDay,daysInMonth}=getMonthData(year,month);const today=getDateKey();const days=[];for(let i=0;i<firstDay;i++)days.push(<div key={`e${i}`} className="calendar-day empty"/>);for(let d=1;d<=daysInMonth;d++){const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const sc=schedules.find(s=>normalizeDate(s.date)===ds);const att=attendance?.find(a=>normalizeDate(a.date)===ds);const isToday=ds===today;const isSel=ds===selectedDate;const hasAtt=att&&att.morningIn;days.push(<div key={d} className={`calendar-day ${isToday?'today':''} ${isSel?'selected':''} ${sc?'has-schedule':''} ${hasAtt&&showAttendance?'has-attendance':''} ${sc&&sc.type!=='WORK'?'rest':''}`} onClick={()=>onDayClick&&onDayClick(ds)}><div className="day-num">{d}</div>{sc&&sc.type==='WORK'&&<><div className="day-info">{formatTime24(sc.morningIn)}</div><div className="day-branch">{sc.branch||''}</div></>}{sc&&sc.type!=='WORK'&&<div className="day-type">{sc.type}</div>}{hasAtt&&showAttendance&&<div className="day-present">✅</div>}</div>)}return<div className="calendar"><div className="calendar-weekdays">{['S','M','T','W','T','F','S'].map((d,i)=><span key={i}>{d}</span>)}</div><div className="calendar-days">{days}</div></div>};
 
-const ScheduleCalendar=({schedules,attendance,year,month,selectedDate,onDayClick,showAttendance})=>{
-  const{firstDay,daysInMonth}=getMonthData(year,month);
-  const today=getDateKey();
-  const days=[];
-  for(let i=0;i<firstDay;i++)days.push(<div key={`e${i}`} className="calendar-day empty"/>);
-  for(let d=1;d<=daysInMonth;d++){
-    const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const sc=schedules.find(s=>normalizeDate(s.date)===ds);
-    const att=attendance?.find(a=>normalizeDate(a.date)===ds);
-    const isToday=ds===today;
-    const isSel=ds===selectedDate;
-    const hasAtt=att&&att.morningIn;
-    days.push(<div key={d} className={`calendar-day ${isToday?'today':''} ${isSel?'selected':''} ${sc?'has-schedule':''} ${hasAtt&&showAttendance?'has-attendance':''} ${sc&&sc.type!=='WORK'?'rest':''}`} onClick={()=>onDayClick&&onDayClick(ds)}>
-      <div className="day-num">{d}</div>
-      {sc&&sc.type==='WORK'&&<><div className="day-info">{formatTime24(sc.morningIn)}</div><div className="day-branch">{sc.branch||''}</div></>}
-      {sc&&sc.type!=='WORK'&&<div className="day-type">{sc.type}</div>}
-      {hasAtt&&showAttendance&&<div className="day-present">✅</div>}
-    </div>)
-  }
-  return<div className="calendar"><div className="calendar-weekdays">{['S','M','T','W','T','F','S'].map((d,i)=><span key={i}>{d}</span>)}</div><div className="calendar-days">{days}</div></div>
+// Payroll Modal Component
+const PayrollModal=({employee,attendance,schedules,onClose})=>{
+  const[dateFrom,setDateFrom]=useState(()=>{const d=new Date();d.setDate(d.getDate()-6);return getDateKey(d)});
+  const[dateTo,setDateTo]=useState(getDateKey());
+  const[showCustomRange,setShowCustomRange]=useState(false);
+  const[customData,setCustomData]=useState(null);
+  
+  const getAttendanceForDate=(date)=>attendance.find(a=>a.empId===employee.id&&normalizeDate(a.date)===date);
+  const getScheduleForDate=(date)=>schedules.find(s=>s.empId===employee.id&&normalizeDate(s.date)===date);
+  
+  // Calculate last 7 days summary
+  const last7Days=useMemo(()=>{
+    const dates=getLast7Days();
+    let daysWorked=0,totalHours=0,totalLate=0,totalOT=0,totalDeduct=0,totalOTPay=0,totalNet=0;
+    dates.forEach(date=>{
+      const att=getAttendanceForDate(date);
+      const sched=getScheduleForDate(date);
+      const pay=calcPay(att,sched,employee,date);
+      if(pay.workMin>0)daysWorked++;
+      totalHours+=pay.workMin/60;
+      totalLate+=pay.totalLate;
+      totalOT+=pay.otMin/60;
+      totalDeduct+=pay.deduct;
+      totalOTPay+=pay.ot;
+      totalNet+=pay.net;
+    });
+    return{daysWorked,totalHours,totalLate,totalOT,totalDeduct,totalOTPay,totalNet,startDate:dates[0],endDate:dates[dates.length-1]};
+  },[employee,attendance,schedules]);
+  
+  // Generate custom range report
+  const generateCustomReport=()=>{
+    const dates=getDateRange(dateFrom,dateTo);
+    const days=dates.map(date=>{
+      const att=getAttendanceForDate(date);
+      const sched=getScheduleForDate(date);
+      const pay=calcPay(att,sched,employee,date);
+      return{date,att,sched,pay};
+    });
+    const totals=days.reduce((t,d)=>({
+      daysWorked:t.daysWorked+(d.pay.workMin>0?1:0),
+      hours:t.hours+d.pay.workMin/60,
+      otHours:t.otHours+d.pay.otMin/60,
+      late:t.late+d.pay.totalLate,
+      basic:t.basic+d.pay.basic,
+      ot:t.ot+d.pay.ot,
+      holiday:t.holiday+d.pay.holiday,
+      deduct:t.deduct+d.pay.deduct,
+      net:t.net+d.pay.net
+    }),{daysWorked:0,hours:0,otHours:0,late:0,basic:0,ot:0,holiday:0,deduct:0,net:0});
+    setCustomData({days,totals});
+    setShowCustomRange(true);
+  };
+  
+  const handleExport=()=>{
+    if(customData){
+      exportPayrollToExcel(employee,dateFrom,dateTo,customData);
+    }else{
+      // Export last 7 days
+      const dates=getLast7Days();
+      const days=dates.map(date=>{
+        const att=getAttendanceForDate(date);
+        const sched=getScheduleForDate(date);
+        const pay=calcPay(att,sched,employee,date);
+        return{date,att,sched,pay};
+      });
+      const totals={daysWorked:last7Days.daysWorked,hours:last7Days.totalHours,otHours:last7Days.totalOT,late:last7Days.totalLate,basic:last7Days.totalNet-last7Days.totalOTPay+last7Days.totalDeduct,ot:last7Days.totalOTPay,holiday:0,deduct:last7Days.totalDeduct,net:last7Days.totalNet};
+      exportPayrollToExcel(employee,last7Days.startDate,last7Days.endDate,{days,totals});
+    }
+  };
+  
+  return<div className="modal-overlay" onClick={onClose}><div className="modal" onClick={e=>e.stopPropagation()}><div className="modal-header"><h2>💰 Payroll Details</h2><button className="modal-close" onClick={onClose}>×</button></div><div className="modal-body">
+    {/* Employee Info */}
+    <div style={{textAlign:'center',marginBottom:20}}>
+      <div style={{width:60,height:60,background:'var(--gradient-accent)',borderRadius:16,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto',fontSize:'1.5rem',fontWeight:700,color:'var(--bg-dark)'}}>{employee.name.charAt(0)}</div>
+      <h3 style={{marginTop:12,color:'var(--accent-primary)'}}>{employee.name}</h3>
+      <p style={{color:'var(--text-secondary)',fontSize:'.8rem'}}>{employee.position||'Employee'} • ₱{employee.hourlyRate}/hr</p>
+    </div>
+    
+    {/* Last 7 Days Summary */}
+    <div className="payroll-summary">
+      <h3>📊 Last 7 Days Summary</h3>
+      <p style={{textAlign:'center',fontSize:'.7rem',color:'var(--text-muted)',marginBottom:16}}>{formatDateShort(last7Days.startDate)} - {formatDateShort(last7Days.endDate)}</p>
+      <div className="payroll-stats">
+        <div className="payroll-stat"><div className="value">{last7Days.daysWorked}</div><div className="label">Days Worked</div></div>
+        <div className="payroll-stat"><div className="value">{last7Days.totalHours.toFixed(1)}</div><div className="label">Total Hours</div></div>
+        <div className="payroll-stat danger"><div className="value">{last7Days.totalLate}</div><div className="label">Late (min)</div></div>
+        <div className="payroll-stat info"><div className="value">{last7Days.totalOT.toFixed(1)}</div><div className="label">OT Hours</div></div>
+        <div className="payroll-stat warning"><div className="value">₱{last7Days.totalDeduct.toFixed(0)}</div><div className="label">Late Deduction</div></div>
+        <div className="payroll-stat info"><div className="value">₱{last7Days.totalOTPay.toFixed(0)}</div><div className="label">OT Pay</div></div>
+        <div className="payroll-stat highlight"><div className="value">₱{last7Days.totalNet.toFixed(2)}</div><div className="label">Net Pay (7 Days)</div></div>
+      </div>
+    </div>
+    
+    {/* Date Range Picker */}
+    <div className="date-range-picker">
+      <h4>📅 Custom Date Range</h4>
+      <div className="input-row">
+        <div className="input-group"><label>From</label><input type="date" value={dateFrom} onChange={e=>setDateFrom(e.target.value)}/></div>
+        <div className="input-group"><label>To</label><input type="date" value={dateTo} onChange={e=>setDateTo(e.target.value)}/></div>
+      </div>
+      <button className="btn btn-primary" style={{width:'100%',marginTop:12}} onClick={generateCustomReport}>Generate Report</button>
+    </div>
+    
+    {/* Custom Range Results */}
+    {showCustomRange&&customData&&<>
+      <div className="payroll-summary">
+        <h3>📊 Custom Range Summary</h3>
+        <p style={{textAlign:'center',fontSize:'.7rem',color:'var(--text-muted)',marginBottom:16}}>{formatDateShort(dateFrom)} - {formatDateShort(dateTo)}</p>
+        <div className="payroll-stats">
+          <div className="payroll-stat"><div className="value">{customData.totals.daysWorked}</div><div className="label">Days Worked</div></div>
+          <div className="payroll-stat"><div className="value">{customData.totals.hours.toFixed(1)}</div><div className="label">Total Hours</div></div>
+          <div className="payroll-stat danger"><div className="value">{customData.totals.late}</div><div className="label">Late (min)</div></div>
+          <div className="payroll-stat info"><div className="value">{customData.totals.otHours.toFixed(1)}</div><div className="label">OT Hours</div></div>
+          <div className="payroll-stat warning"><div className="value">₱{customData.totals.deduct.toFixed(0)}</div><div className="label">Late Deduction</div></div>
+          <div className="payroll-stat info"><div className="value">₱{customData.totals.ot.toFixed(0)}</div><div className="label">OT Pay</div></div>
+          <div className="payroll-stat highlight"><div className="value">₱{customData.totals.net.toFixed(2)}</div><div className="label">Net Pay</div></div>
+        </div>
+      </div>
+      
+      {/* Daily Breakdown Table */}
+      <div style={{overflowX:'auto'}}>
+        <table className="payroll-table">
+          <thead><tr><th>Date</th><th className="text-right">Hours</th><th className="text-right">Late</th><th className="text-right">OT</th><th className="text-right">Net</th></tr></thead>
+          <tbody>
+            {customData.days.map(d=><tr key={d.date}>
+              <td>{formatDateShort(d.date)}</td>
+              <td className="text-right">{(d.pay.workMin/60).toFixed(1)}</td>
+              <td className="text-right" style={{color:d.pay.totalLate>0?'var(--accent-danger)':'inherit'}}>{d.pay.totalLate||'—'}</td>
+              <td className="text-right" style={{color:d.pay.otMin>0?'var(--accent-secondary)':'inherit'}}>{d.pay.otMin>0?(d.pay.otMin/60).toFixed(1):'—'}</td>
+              <td className="text-right">₱{d.pay.net.toFixed(0)}</td>
+            </tr>)}
+            <tr className="total-row">
+              <td>TOTAL</td>
+              <td className="text-right">{customData.totals.hours.toFixed(1)}</td>
+              <td className="text-right">{customData.totals.late}</td>
+              <td className="text-right">{customData.totals.otHours.toFixed(1)}</td>
+              <td className="text-right">₱{customData.totals.net.toFixed(0)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </>}
+    
+    {/* Export Button */}
+    <div className="export-section">
+      <button className="btn btn-success" onClick={handleExport}>📥 Export to Excel</button>
+    </div>
+  </div></div></div>
 };
 
 const Dashboard=({employee,attendance,schedules,onRecordTime,onLogout,syncStatus})=>{
@@ -427,12 +441,12 @@ return<div className="app-container"><SyncIndicator status={syncStatus}/><div cl
 
 <div className="time-section"><h3>Morning</h3><div className="time-buttons">
 <TimeButton label="Time In" time={rec.morningIn} onClick={()=>onRecordTime('morningIn')} disabled={!!rec.morningIn} isLate={pay.mLate>0} lateMin={pay.mLate} hasLoc={rec.morningInLat}/>
-<TimeButton label="Time Out" time={rec.morningOut} onClick={()=>onRecordTime('morningOut')} disabled={!rec.morningIn||!!rec.morningOut}/>
+<TimeButton label="Time Out" time={rec.morningOut} onClick={()=>onRecordTime('morningOut')} disabled={!rec.morningIn||!!rec.morningOut} hasLoc={rec.morningOutLat}/>
 </div></div>
 
 <div className="time-section"><h3>Afternoon</h3><div className="time-buttons">
 <TimeButton label="Time In" time={rec.afternoonIn} onClick={()=>onRecordTime('afternoonIn')} disabled={!!rec.afternoonIn||!rec.morningOut} isLate={pay.aLate>0} lateMin={pay.aLate} hasLoc={rec.afternoonInLat}/>
-<TimeButton label="Time Out" time={rec.afternoonOut} onClick={()=>onRecordTime('afternoonOut')} disabled={!rec.afternoonIn||!!rec.afternoonOut}/>
+<TimeButton label="Time Out" time={rec.afternoonOut} onClick={()=>onRecordTime('afternoonOut')} disabled={!rec.afternoonIn||!!rec.afternoonOut} hasLoc={rec.afternoonOutLat}/>
 </div></div>
 
 <div className="time-section"><h3>Today's Summary</h3><div className="summary-grid"><div className="summary-card"><div className="value">{(pay.workMin/60).toFixed(1)}</div><div className="label">Hours</div></div><div className="summary-card late"><div className="value">{pay.totalLate}</div><div className="label">Late</div></div><div className="summary-card pay"><div className="value">₱{pay.net.toFixed(0)}</div><div className="label">Net</div></div></div></div>
@@ -459,8 +473,7 @@ const[aCalMonth,setACalMonth]=useState(new Date().getMonth());
 const[selectedDay,setSelectedDay]=useState(null);
 const[newBranchName,setNewBranchName]=useState('');
 const[newBranchAddr,setNewBranchAddr]=useState('');
-// NEW: State for attendance detail modal
-const[viewAttendanceDate,setViewAttendanceDate]=useState(null);
+const[payrollEmp,setPayrollEmp]=useState(null);
 
 const showToast=(m)=>{setToast(m);setTimeout(()=>setToast(''),2500)};
 const today=getDateKey();
@@ -481,16 +494,6 @@ const aNextMonth=()=>{if(aCalMonth===11){setACalMonth(0);setACalYear(aCalYear+1)
 const handleDaySelect=(d)=>{setSelectedDay(d);const ex=assignEmp?schedules.find(s=>s.empId===assignEmp.id&&normalizeDate(s.date)===d):null;if(ex){setAssignType(ex.type);setAssignTime(ex.morningIn||'08:00');setAssignBranch(ex.branch||branches[0]?.name||'')}else{setAssignType('WORK');setAssignTime('08:00');setAssignBranch(branches[0]?.name||'')}};
 const handleSaveSchedule=async()=>{if(!assignEmp||!selectedDay)return;await onSetSchedule({empId:assignEmp.id,date:selectedDay,type:assignType,morningIn:assignType==='WORK'?assignTime:'',branch:assignType==='WORK'?assignBranch:''});showToast('Schedule saved!');setSelectedDay(null)};
 const handleAddBranch=async()=>{if(!newBranchName)return;await onAddBranch({name:newBranchName,address:newBranchAddr});setNewBranchName('');setNewBranchAddr('');showToast('Branch added!')};
-
-// NEW: Handle clicking a date in the Schedules tab calendar
-const handleViewAttendance=(date)=>{
-  if(!viewEmp)return;
-  setViewAttendanceDate(date);
-};
-
-// Get attendance and schedule for the selected date
-const getAttendanceForDate=(empId,date)=>attendance.find(a=>a.empId===empId&&normalizeDate(a.date)===date);
-const getScheduleForDate=(empId,date)=>schedules.find(s=>s.empId===empId&&normalizeDate(s.date)===date);
 
 return<div className="app-container">
 <SyncIndicator status={syncStatus}/>
@@ -568,25 +571,9 @@ return<div className="app-container">
 </div>
 {viewEmp&&<>
 <div className="section-title" style={{marginTop:24}}>Schedule Calendar</div>
-<p style={{color:'var(--text-secondary)',fontSize:'.75rem',marginBottom:12}}>Tap a date to view attendance details</p>
 <div className="calendar-header"><h3>{monthNames[calMonth]} {calYear}</h3><div className="calendar-nav"><button onClick={prevMonth}>◀</button><button onClick={nextMonth}>▶</button></div></div>
-<ScheduleCalendar 
-  schedules={schedules.filter(s=>s.empId===viewEmp.id)} 
-  attendance={attendance.filter(a=>a.empId===viewEmp.id)}
-  year={calYear} 
-  month={calMonth}
-  onDayClick={handleViewAttendance}
-  showAttendance={true}
-/>
+<ScheduleCalendar schedules={schedules.filter(s=>s.empId===viewEmp.id)} attendance={attendance.filter(a=>a.empId===viewEmp.id)} year={calYear} month={calMonth} showAttendance={true}/>
 </>}
-{/* Attendance Detail Modal */}
-{viewAttendanceDate&&viewEmp&&<AttendanceDetailModal 
-  employee={viewEmp}
-  date={viewAttendanceDate}
-  attendance={getAttendanceForDate(viewEmp.id,viewAttendanceDate)}
-  schedule={getScheduleForDate(viewEmp.id,viewAttendanceDate)}
-  onClose={()=>setViewAttendanceDate(null)}
-/>}
 </div>}
 
 {tab==='assign'&&<div className="page-content">
@@ -610,6 +597,22 @@ return<div className="app-container">
 </>}
 </div>}
 
+{tab==='payroll'&&<div className="page-content">
+<div className="section-title">💰 Employee Payroll</div>
+<p style={{color:'var(--text-secondary)',fontSize:'.8rem',marginBottom:16}}>Tap an employee to view payroll details</p>
+<div className="payroll-emp-list">
+{activeEmps.map(emp=><div key={emp.id} className="payroll-emp-item" onClick={()=>setPayrollEmp(emp)}>
+  <div className="emp-info">
+    <div className="name">{emp.name}</div>
+    <div className="position">{emp.position||'Employee'}</div>
+  </div>
+  <div className="emp-rate">₱{emp.hourlyRate}/hr</div>
+</div>)}
+{activeEmps.length===0&&<div className="empty-state"><div className="icon">👥</div><p>No active employees</p></div>}
+</div>
+{payrollEmp&&<PayrollModal employee={payrollEmp} attendance={attendance} schedules={schedules} onClose={()=>setPayrollEmp(null)}/>}
+</div>}
+
 {tab==='settings'&&<div className="page-content">
 <div className="section-title">Manage Branches</div>
 <div className="add-form">
@@ -627,6 +630,7 @@ return<div className="app-container">
 <button className={`nav-item ${tab==='employees'?'active':''}`} onClick={()=>setTab('employees')}><span className="nav-icon">👥</span>Employees</button>
 <button className={`nav-item ${tab==='schedules'?'active':''}`} onClick={()=>setTab('schedules')}><span className="nav-icon">📅</span>Schedules</button>
 <button className={`nav-item ${tab==='assign'?'active':''}`} onClick={()=>setTab('assign')}><span className="nav-icon">✏️</span>Assign</button>
+<button className={`nav-item ${tab==='payroll'?'active':''}`} onClick={()=>setTab('payroll')}><span className="nav-icon">💰</span>Payroll</button>
 <button className={`nav-item ${tab==='settings'?'active':''}`} onClick={()=>setTab('settings')}><span className="nav-icon">⚙️</span>Settings</button>
 </div>
 {toast&&<div className="success-toast">{toast}</div>}
@@ -653,19 +657,8 @@ const recordTime=async(field)=>{
   const now=new Date().toISOString();
   setSyncStatus('syncing');
   let lat,lng;
-  if(field==='morningIn'||field==='afternoonIn'){
-    try{
-      const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{enableHighAccuracy:true,timeout:10000}));
-      lat=pos.coords.latitude;
-      lng=pos.coords.longitude;
-    }catch(e){}
-  }
-  try{
-    await api.call('recordTime',{},{empId:user.id,date:today,field,value:now,lat,lng});
-    await loadData();
-  }catch(e){
-    setSyncStatus('offline');
-  }
+  try{const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{enableHighAccuracy:true,timeout:10000}));lat=pos.coords.latitude;lng=pos.coords.longitude}catch(e){}
+  try{await api.call('recordTime',{},{empId:user.id,date:today,field,value:now,lat,lng});await loadData()}catch(e){setSyncStatus('offline')}
 };
 
 const addEmployee=async(data)=>{setSyncStatus('syncing');try{await api.call('addEmployee',{},data);await loadData()}catch(e){setSyncStatus('offline')}};
