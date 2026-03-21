@@ -97,11 +97,13 @@
     .calendar-day.today{border-color:var(--accent-secondary)}
     .calendar-day.selected{border-color:var(--accent-primary);background:rgba(0,255,136,.1)}
     .calendar-day.has-schedule{background:rgba(0,255,136,.08)}
+    .calendar-day.has-attendance{border-color:var(--accent-secondary)}
     .calendar-day.rest{background:rgba(170,102,255,.1)}
     .calendar-day .day-num{font-weight:700;margin-bottom:2px}
     .calendar-day .day-info{font-size:.5rem;color:var(--accent-primary);text-align:center;line-height:1.2}
     .calendar-day .day-branch{font-size:.45rem;color:var(--accent-secondary);margin-top:1px;max-width:100%;overflow:hidden;text-overflow:ellipsis}
     .calendar-day .day-type{font-size:.5rem;color:var(--accent-purple);font-weight:600}
+    .calendar-day .day-present{font-size:.5rem;color:var(--accent-primary);margin-top:2px}
     .schedule-types{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
     .schedule-type-btn{padding:10px 16px;background:var(--bg-card);border:2px solid var(--border-color);border-radius:10px;color:var(--text-secondary);font-size:.8rem;cursor:pointer}
     .schedule-type-btn.active{border-color:var(--accent-primary);color:var(--accent-primary);background:rgba(0,255,136,.1)}
@@ -175,6 +177,25 @@
     .history-item .date{font-family:'Space Mono',monospace;font-size:.8rem}
     .history-item .hours{font-size:.75rem;color:var(--text-secondary)}
     .history-item .pay{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--accent-secondary)}
+    .attendance-detail{margin-bottom:20px}
+    .attendance-detail .time-row{display:flex;justify-content:space-between;align-items:center;padding:14px;background:var(--bg-elevated);border-radius:12px;margin-bottom:8px}
+    .attendance-detail .time-row .period{font-size:.7rem;color:var(--text-secondary);text-transform:uppercase}
+    .attendance-detail .time-row .times{display:flex;gap:16px}
+    .attendance-detail .time-row .time-item{text-align:center}
+    .attendance-detail .time-row .time-item .label{font-size:.55rem;color:var(--text-muted);text-transform:uppercase}
+    .attendance-detail .time-row .time-item .value{font-family:'Space Mono',monospace;font-size:.9rem;color:var(--accent-primary)}
+    .map-container{border-radius:12px;overflow:hidden;margin-top:16px;border:1px solid var(--border-color)}
+    .map-container iframe{width:100%;height:200px;border:none}
+    .location-card{background:var(--bg-elevated);border-radius:12px;padding:14px;margin-bottom:10px}
+    .location-card h4{font-size:.75rem;color:var(--text-secondary);margin-bottom:10px;text-transform:uppercase}
+    .location-card .coords{font-family:'Space Mono',monospace;font-size:.75rem;color:var(--accent-secondary);margin-bottom:10px}
+    .location-card a{display:inline-block;padding:8px 14px;background:var(--gradient-accent);color:var(--bg-dark);border-radius:8px;font-size:.75rem;font-weight:600;text-decoration:none}
+    .no-location{color:var(--text-muted);font-size:.8rem;text-align:center;padding:20px}
+    .attendance-summary{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+    .attendance-summary .sum-card{background:var(--bg-elevated);border-radius:12px;padding:14px;text-align:center}
+    .attendance-summary .sum-card .value{font-family:'Space Mono',monospace;font-size:1.2rem;font-weight:700;color:var(--accent-primary)}
+    .attendance-summary .sum-card .label{font-size:.6rem;color:var(--text-secondary);margin-top:4px;text-transform:uppercase}
+    .attendance-summary .sum-card.pay .value{color:var(--accent-secondary)}
     @media(max-width:380px){.time-display .time{font-size:2.5rem}.stat-grid{grid-template-columns:1fr}.summary-grid{grid-template-columns:repeat(2,1fr)}}
   </style>
 </head>
@@ -190,7 +211,6 @@ const api={async call(action,params={},postData=null){const url=new URL(getApiUr
 const getHolidays=(year)=>{const h={regular:[],special:[]};h.regular.push({date:`${year}-01-01`,name:"New Year"},{date:`${year}-04-09`,name:"Araw ng Kagitingan"},{date:`${year}-05-01`,name:"Labor Day"},{date:`${year}-06-12`,name:"Independence"},{date:`${year}-11-30`,name:"Bonifacio Day"},{date:`${year}-12-25`,name:"Christmas"},{date:`${year}-12-30`,name:"Rizal Day"});h.special.push({date:`${year}-08-21`,name:"Ninoy Aquino"},{date:`${year}-11-01`,name:"All Saints"},{date:`${year}-12-31`,name:"New Year's Eve"});return h};
 const isHoliday=(d)=>{const y=parseInt(d.split('-')[0]);const h=getHolidays(y);const r=h.regular.find(x=>x.date===d);const s=h.special.find(x=>x.date===d);if(r)return{type:'regular',name:r.name};if(s)return{type:'special',name:s.name};return null};
 
-// Format clock time from ISO string
 const formatTime=(d)=>{
   if(!d)return'--:--';
   try{
@@ -200,10 +220,8 @@ const formatTime=(d)=>{
   }catch(e){return'--:--'}
 };
 
-// Format schedule time (handles both "HH:MM" string and Date objects)
 const formatTime24=(t)=>{
   if(!t)return'--:--';
-  // If it's a string like "10:00" or "17:30"
   if(typeof t==='string'){
     if(t.includes(':')){
       const parts=t.split(':');
@@ -215,7 +233,6 @@ const formatTime24=(t)=>{
       return`${hour}:${m.toString().padStart(2,'0')} ${ampm}`;
     }
   }
-  // If it's a Date object or date string
   try{
     const date=new Date(t);
     if(!isNaN(date.getTime())){
@@ -230,8 +247,8 @@ const formatTime24=(t)=>{
 };
 
 const formatDate=(d)=>new Date(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+const formatDateLong=(d)=>new Date(d+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
-// Get today's date in YYYY-MM-DD format (LOCAL timezone)
 const getDateKey=(d=new Date())=>{
   const date=d instanceof Date?d:new Date(d);
   const year=date.getFullYear();
@@ -240,7 +257,6 @@ const getDateKey=(d=new Date())=>{
   return`${year}-${month}-${day}`;
 };
 
-// Normalize any date format to YYYY-MM-DD
 const normalizeDate=(d)=>{
   if(!d)return'';
   if(typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d))return d;
@@ -281,7 +297,110 @@ const LoadingScreen=()=><div className="loading-screen"><div className="loading-
 const SyncIndicator=({status})=><div className={`sync-indicator ${status}`}><div className={`sync-dot ${status}`}/>{status==='syncing'?'Syncing...':status==='synced'?'Synced':'Offline'}</div>;
 const TimeButton=({label,time,onClick,disabled,isLate,lateMin,hasLoc})=><button className={`btn-time ${time?(isLate?'late':'recorded'):''}`} onClick={onClick} disabled={disabled}><span className="time-value">{time?formatTime(time):'--:--'}</span><span className="time-label">{label}</span>{time&&isLate&&<span className="badge late-badge">LATE {lateMin}m</span>}{time&&hasLoc&&<span className="badge loc-badge">📍</span>}</button>;
 
-const ScheduleCalendar=({schedules,year,month,selectedDate,onDayClick})=>{const{firstDay,daysInMonth}=getMonthData(year,month);const today=getDateKey();const days=[];for(let i=0;i<firstDay;i++)days.push(<div key={`e${i}`} className="calendar-day empty"/>);for(let d=1;d<=daysInMonth;d++){const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const sc=schedules.find(s=>normalizeDate(s.date)===ds);const isToday=ds===today;const isSel=ds===selectedDate;days.push(<div key={d} className={`calendar-day ${isToday?'today':''} ${isSel?'selected':''} ${sc?'has-schedule':''} ${sc&&sc.type!=='WORK'?'rest':''}`} onClick={()=>onDayClick&&onDayClick(ds)}><div className="day-num">{d}</div>{sc&&sc.type==='WORK'&&<><div className="day-info">{formatTime24(sc.morningIn)}</div><div className="day-branch">{sc.branch||''}</div></>}{sc&&sc.type!=='WORK'&&<div className="day-type">{sc.type}</div>}</div>)}return<div className="calendar"><div className="calendar-weekdays">{['S','M','T','W','T','F','S'].map((d,i)=><span key={i}>{d}</span>)}</div><div className="calendar-days">{days}</div></div>};
+// Attendance Detail Modal Component
+const AttendanceDetailModal=({employee,date,attendance,schedule,onClose})=>{
+  const att=attendance||{};
+  const sched=schedule;
+  const pay=calcPay(att,sched,employee,date);
+  
+  const hasAnyLocation=att.morningInLat||att.afternoonInLat;
+  
+  // Create Google Maps URL for a location
+  const getMapUrl=(lat,lng)=>`https://www.google.com/maps?q=${lat},${lng}`;
+  
+  // Create embedded map URL (using OpenStreetMap for free embedding)
+  const getEmbedUrl=(lat,lng)=>`https://www.openstreetmap.org/export/embed.html?bbox=${lng-0.005},${lat-0.005},${lng+0.005},${lat+0.005}&layer=mapnik&marker=${lat},${lng}`;
+  
+  return<div className="modal-overlay" onClick={onClose}><div className="modal" onClick={e=>e.stopPropagation()}><div className="modal-header"><h2>📅 Attendance Details</h2><button className="modal-close" onClick={onClose}>×</button></div><div className="modal-body">
+    <div style={{textAlign:'center',marginBottom:20}}>
+      <h3 style={{color:'var(--accent-primary)'}}>{employee.name}</h3>
+      <p style={{color:'var(--text-secondary)',fontSize:'.85rem',marginTop:4}}>{formatDateLong(date)}</p>
+      {sched&&<p style={{marginTop:8}}><span className="status-badge active">{sched.type}</span>{sched.type==='WORK'&&<span style={{marginLeft:8,color:'var(--accent-secondary)',fontSize:'.8rem'}}>📍 {sched.branch||'No branch'}</span>}</p>}
+    </div>
+    
+    {/* Schedule Info */}
+    {sched&&sched.type==='WORK'&&<div className="card" style={{marginBottom:16}}>
+      <div className="detail-row"><span className="label">Scheduled Time In</span><span className="value">{formatTime24(sched.morningIn)}</span></div>
+      <div className="detail-row"><span className="label">Branch</span><span className="value">{sched.branch||'—'}</span></div>
+    </div>}
+    
+    {/* Attendance Times */}
+    <div className="section-title">Clock In/Out</div>
+    <div className="attendance-detail">
+      <div className="time-row">
+        <span className="period">🌅 Morning</span>
+        <div className="times">
+          <div className="time-item"><div className="label">In</div><div className="value">{formatTime(att.morningIn)}</div></div>
+          <div className="time-item"><div className="label">Out</div><div className="value">{formatTime(att.morningOut)}</div></div>
+        </div>
+      </div>
+      <div className="time-row">
+        <span className="period">🌇 Afternoon</span>
+        <div className="times">
+          <div className="time-item"><div className="label">In</div><div className="value">{formatTime(att.afternoonIn)}</div></div>
+          <div className="time-item"><div className="label">Out</div><div className="value">{formatTime(att.afternoonOut)}</div></div>
+        </div>
+      </div>
+    </div>
+    
+    {/* Summary */}
+    <div className="section-title">Summary</div>
+    <div className="attendance-summary">
+      <div className="sum-card"><div className="value">{(pay.workMin/60).toFixed(1)}</div><div className="label">Hours Worked</div></div>
+      <div className="sum-card"><div className="value" style={{color:'var(--accent-danger)'}}>{pay.totalLate}</div><div className="label">Minutes Late</div></div>
+      <div className="sum-card pay"><div className="value">₱{pay.net.toFixed(0)}</div><div className="label">Net Pay</div></div>
+      <div className="sum-card"><div className="value" style={{color:'var(--accent-warning)'}}>₱{pay.deduct.toFixed(0)}</div><div className="label">Deductions</div></div>
+    </div>
+    
+    {/* Location Maps */}
+    <div className="section-title">📍 Clock-In Locations</div>
+    
+    {att.morningInLat&&att.morningInLng?<div className="location-card">
+      <h4>🌅 Morning Clock-In Location</h4>
+      <div className="coords">Lat: {parseFloat(att.morningInLat).toFixed(6)}, Lng: {parseFloat(att.morningInLng).toFixed(6)}</div>
+      <div className="map-container">
+        <iframe src={getEmbedUrl(att.morningInLat,att.morningInLng)} loading="lazy"/>
+      </div>
+      <div style={{marginTop:10}}>
+        <a href={getMapUrl(att.morningInLat,att.morningInLng)} target="_blank" rel="noopener noreferrer">🗺️ Open in Google Maps</a>
+      </div>
+    </div>:<div className="location-card"><h4>🌅 Morning Clock-In Location</h4><p className="no-location">No location data recorded</p></div>}
+    
+    {att.afternoonInLat&&att.afternoonInLng?<div className="location-card">
+      <h4>🌇 Afternoon Clock-In Location</h4>
+      <div className="coords">Lat: {parseFloat(att.afternoonInLat).toFixed(6)}, Lng: {parseFloat(att.afternoonInLng).toFixed(6)}</div>
+      <div className="map-container">
+        <iframe src={getEmbedUrl(att.afternoonInLat,att.afternoonInLng)} loading="lazy"/>
+      </div>
+      <div style={{marginTop:10}}>
+        <a href={getMapUrl(att.afternoonInLat,att.afternoonInLng)} target="_blank" rel="noopener noreferrer">🗺️ Open in Google Maps</a>
+      </div>
+    </div>:<div className="location-card"><h4>🌇 Afternoon Clock-In Location</h4><p className="no-location">No location data recorded</p></div>}
+    
+  </div></div></div>
+};
+
+const ScheduleCalendar=({schedules,attendance,year,month,selectedDate,onDayClick,showAttendance})=>{
+  const{firstDay,daysInMonth}=getMonthData(year,month);
+  const today=getDateKey();
+  const days=[];
+  for(let i=0;i<firstDay;i++)days.push(<div key={`e${i}`} className="calendar-day empty"/>);
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const sc=schedules.find(s=>normalizeDate(s.date)===ds);
+    const att=attendance?.find(a=>normalizeDate(a.date)===ds);
+    const isToday=ds===today;
+    const isSel=ds===selectedDate;
+    const hasAtt=att&&att.morningIn;
+    days.push(<div key={d} className={`calendar-day ${isToday?'today':''} ${isSel?'selected':''} ${sc?'has-schedule':''} ${hasAtt&&showAttendance?'has-attendance':''} ${sc&&sc.type!=='WORK'?'rest':''}`} onClick={()=>onDayClick&&onDayClick(ds)}>
+      <div className="day-num">{d}</div>
+      {sc&&sc.type==='WORK'&&<><div className="day-info">{formatTime24(sc.morningIn)}</div><div className="day-branch">{sc.branch||''}</div></>}
+      {sc&&sc.type!=='WORK'&&<div className="day-type">{sc.type}</div>}
+      {hasAtt&&showAttendance&&<div className="day-present">✅</div>}
+    </div>)
+  }
+  return<div className="calendar"><div className="calendar-weekdays">{['S','M','T','W','T','F','S'].map((d,i)=><span key={i}>{d}</span>)}</div><div className="calendar-days">{days}</div></div>
+};
 
 const Dashboard=({employee,attendance,schedules,onRecordTime,onLogout,syncStatus})=>{
 const[now,setNow]=useState(new Date());
@@ -340,6 +459,8 @@ const[aCalMonth,setACalMonth]=useState(new Date().getMonth());
 const[selectedDay,setSelectedDay]=useState(null);
 const[newBranchName,setNewBranchName]=useState('');
 const[newBranchAddr,setNewBranchAddr]=useState('');
+// NEW: State for attendance detail modal
+const[viewAttendanceDate,setViewAttendanceDate]=useState(null);
 
 const showToast=(m)=>{setToast(m);setTimeout(()=>setToast(''),2500)};
 const today=getDateKey();
@@ -360,6 +481,16 @@ const aNextMonth=()=>{if(aCalMonth===11){setACalMonth(0);setACalYear(aCalYear+1)
 const handleDaySelect=(d)=>{setSelectedDay(d);const ex=assignEmp?schedules.find(s=>s.empId===assignEmp.id&&normalizeDate(s.date)===d):null;if(ex){setAssignType(ex.type);setAssignTime(ex.morningIn||'08:00');setAssignBranch(ex.branch||branches[0]?.name||'')}else{setAssignType('WORK');setAssignTime('08:00');setAssignBranch(branches[0]?.name||'')}};
 const handleSaveSchedule=async()=>{if(!assignEmp||!selectedDay)return;await onSetSchedule({empId:assignEmp.id,date:selectedDay,type:assignType,morningIn:assignType==='WORK'?assignTime:'',branch:assignType==='WORK'?assignBranch:''});showToast('Schedule saved!');setSelectedDay(null)};
 const handleAddBranch=async()=>{if(!newBranchName)return;await onAddBranch({name:newBranchName,address:newBranchAddr});setNewBranchName('');setNewBranchAddr('');showToast('Branch added!')};
+
+// NEW: Handle clicking a date in the Schedules tab calendar
+const handleViewAttendance=(date)=>{
+  if(!viewEmp)return;
+  setViewAttendanceDate(date);
+};
+
+// Get attendance and schedule for the selected date
+const getAttendanceForDate=(empId,date)=>attendance.find(a=>a.empId===empId&&normalizeDate(a.date)===date);
+const getScheduleForDate=(empId,date)=>schedules.find(s=>s.empId===empId&&normalizeDate(s.date)===date);
 
 return<div className="app-container">
 <SyncIndicator status={syncStatus}/>
@@ -437,9 +568,25 @@ return<div className="app-container">
 </div>
 {viewEmp&&<>
 <div className="section-title" style={{marginTop:24}}>Schedule Calendar</div>
+<p style={{color:'var(--text-secondary)',fontSize:'.75rem',marginBottom:12}}>Tap a date to view attendance details</p>
 <div className="calendar-header"><h3>{monthNames[calMonth]} {calYear}</h3><div className="calendar-nav"><button onClick={prevMonth}>◀</button><button onClick={nextMonth}>▶</button></div></div>
-<ScheduleCalendar schedules={schedules.filter(s=>s.empId===viewEmp.id)} year={calYear} month={calMonth}/>
+<ScheduleCalendar 
+  schedules={schedules.filter(s=>s.empId===viewEmp.id)} 
+  attendance={attendance.filter(a=>a.empId===viewEmp.id)}
+  year={calYear} 
+  month={calMonth}
+  onDayClick={handleViewAttendance}
+  showAttendance={true}
+/>
 </>}
+{/* Attendance Detail Modal */}
+{viewAttendanceDate&&viewEmp&&<AttendanceDetailModal 
+  employee={viewEmp}
+  date={viewAttendanceDate}
+  attendance={getAttendanceForDate(viewEmp.id,viewAttendanceDate)}
+  schedule={getScheduleForDate(viewEmp.id,viewAttendanceDate)}
+  onClose={()=>setViewAttendanceDate(null)}
+/>}
 </div>}
 
 {tab==='assign'&&<div className="page-content">
