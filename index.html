@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0a0f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="TimeTrack">
+  <title>TimeTrack Pro</title>
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlRpbWVUcmFjayBQcm8iLAogICJzaG9ydF9uYW1lIjogIlRpbWVUcmFjayIsCiAgImRlc2NyaXB0aW9uIjogIkVtcGxveWVlIEF0dGVuZGFuY2UgU3lzdGVtIiwKICAic3RhcnRfdXJsIjogIi4iLAogICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLAogICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwYTBhMGYiLAogICJ0aGVtZV9jb2xvciI6ICIjMGEwYTBmIiwKICAib3JpZW50YXRpb24iOiAicG9ydHJhaXQiLAogICJpY29ucyI6IFsKICAgIHsKICAgICAgInNyYyI6ICJkYXRhOmltYWdlL3N2Zyt4bWw7YmFzZTY0LFBITjJaeUIyYVdWM1FtOTRQU0l3SURBZ01UQXdJREV3TUNJZ2VHMXNibk05SW1oMGRIQTZMeTkzZDNjdWR6TXViM0puTHpJd01EQXZjM1puSWo0OGNtVmpkQ0IzYVdSMGFEMGlNVEF3SWlCb1pXbG5hSFE5SWpFd01DSWdabWxzYkQwaUl6QmhNR0V3WmlJdlBqeDBaWGgwSUhnOUlqVXdJaUI1UFNJMk1DSWdabTl1ZEMxbVlXMXBiSGs5SWsxdmJtOXpjR0ZqWlNJZ1ptOXVkQzF6YVhwbFBTSXpNQ0lnWm1sc2JEMGlJekF3Wm1ZNE9DSWdkR1Y0ZEMxaGJtTm9iM0k5SW0xcFpHUnNaU0krVkZROEwzUmxlSFErUEM5emRtYysiLAogICAgICAic2l6ZXMiOiAiOTZ4OTYiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIiwKICAgICAgInB1cnBvc2UiOiAiYW55IG1hc2thYmxlIgogICAgfQogIF0KfQ==">
+  
+  <!-- iOS Icons -->
+  <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzBhMGEwZiIvPjx0ZXh0IHg9IjUwIiB5PSI2MCIgZm9udC1mYW1pbHk9Ik1vbm9zcGFjZSIgZm9udC1zaXplPSIzMCIgZmlsbD0iIzAwZmY4OCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+VFQ8L3RleHQ+PC9zdmc+">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #0a0a0f;
+      --bg-card: #12121a;
+      --bg-elevated: #1a1a24;
+      --accent-primary: #00ff88;
+      --accent-secondary: #00ccff;
+      --accent-warning: #ffaa00;
+      --accent-danger: #ff4466;
+      --accent-purple: #aa66ff;
+      --accent-pink: #ff66aa;
+      --text-primary: #ffffff;
+      --text-secondary: #8888aa;
+      --text-muted: #555566;
+      --border-color: #2a2a3a;
+      --gradient-accent: linear-gradient(135deg, #00ff88 0%, #00ccff 100%);
+      --gradient-purple: linear-gradient(135deg, #aa66ff 0%, #6644ff 100%);
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      font-family: 'Sora', sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      overscroll-behavior: none;
+      padding-top: var(--safe-top);
+      padding-bottom: var(--safe-bottom);
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(0, 255, 136, 0.05) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(0, 204, 255, 0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #root { position: relative; z-index: 1; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-screen {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid var(--border-color);
+      border-top-color: var(--accent-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    .loading-text { color: var(--text-secondary); font-size: 0.9rem; }
+
+    .setup-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .setup-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 30px;
+      width: 100%;
+      max-width: 500px;
+    }
+    .setup-card h2 {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      background: var(--gradient-accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .setup-card p { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 16px; line-height: 1.6; }
+    .setup-card textarea {
+      width: 100%;
+      padding: 12px;
+      background: var(--bg-elevated);
+      border: 2px solid var(--border-color);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      resize: none;
+      height: 80px;
+    }
+    .setup-card textarea:focus { outline: none; border-color: var(--accent-primary); }
+
+    .app-container { min-height: 100vh; padding: 16px; padding-bottom: calc(16px + var(--safe-bottom)); }
+
+    .login-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .login-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 40px 30px;
+      width: 100%;
+      max-width: 400px;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .logo { text-align: center; margin-bottom: 30px; }
+    .logo h1 { font-family: 'Space Mono', monospace; font-size: 1.8rem; background: var(--gradient-accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .logo p { color: var(--text-secondary); margin-top: 6px; font-size: 0.8rem; }
+
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 6px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+    .input-group input, .input-group select {
+      width: 100%;
+      padding: 14px;
+      background: var(--bg-elevated);
+      border: 2px solid var(--border-color);
+      border-radius: 12px;
+      color: var(--text-primary);
+      font-size: 1rem;
+      font-family: 'Space Mono', monospace;
+    }
+    .input-group input:focus { outline: none; border-color: var(--accent-primary); }
+
+    .btn {
+      padding: 14px 24px;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Sora', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary { background: var(--gradient-accent); color: var(--bg-dark); }
+    .btn-secondary { background: var(--bg-elevated); color: var(--text-primary); border: 2px solid var(--border-color); }
+    .btn-danger { background: rgba(255, 68, 102, 0.2); color: var(--accent-danger); border: 1px solid var(--accent-danger); }
+    .btn-schedule { background: var(--gradient-purple); color: white; }
+
+    .btn-time {
+      padding: 20px;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      background: var(--bg-elevated);
+      border: 2px solid var(--border-color);
+      color: var(--text-primary);
+    }
+    .btn-time:disabled { opacity: 0.5; }
+    .btn-time.recorded { background: rgba(0, 255, 136, 0.1); border-color: var(--accent-primary); color: var(--accent-primary); }
+    .btn-time.late { background: rgba(255, 68, 102, 0.1); border-color: var(--accent-danger); color: var(--accent-danger); }
+    .btn-time .time-value { font-family: 'Space Mono', monospace; font-size: 1.4rem; font-weight: 700; }
+    .btn-time .time-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
+    .btn-time .badge { font-size: 0.6rem; padding: 3px 10px; border-radius: 20px; margin-top: 4px; }
+    .btn-time .badge.late-badge { background: var(--accent-danger); color: white; }
+    .btn-time .badge.loc-badge { background: var(--accent-secondary); color: var(--bg-dark); }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background: var(--bg-card);
+      border-radius: 16px;
+      margin-bottom: 20px;
+    }
+    .header h1 { font-family: 'Space Mono', monospace; font-size: 1.1rem; background: var(--gradient-accent); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .user-info { text-align: right; }
+    .user-info .name { font-weight: 600; font-size: 0.85rem; }
+    .user-info .emp-id { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--accent-primary); }
+    .btn-logout { padding: 8px 14px; font-size: 0.7rem; }
+
+    .time-display {
+      text-align: center;
+      padding: 24px;
+      background: var(--bg-card);
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+    .time-display .date { font-size: 0.85rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 2px; }
+    .time-display .time {
+      font-family: 'Space Mono', monospace;
+      font-size: 3rem;
+      font-weight: 700;
+      background: var(--gradient-accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 10px 0;
+    }
+    .schedule-info { display: flex; justify-content: center; gap: 20px; padding-top: 14px; border-top: 1px solid var(--border-color); flex-wrap: wrap; }
+    .schedule-item { text-align: center; }
+    .schedule-item .label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; }
+    .schedule-item .value { font-family: 'Space Mono', monospace; font-size: 0.85rem; color: var(--accent-secondary); margin-top: 2px; }
+
+    .holiday-banner {
+      background: linear-gradient(135deg, rgba(255, 170, 0, 0.2) 0%, rgba(255, 102, 170, 0.2) 100%);
+      border: 1px solid var(--accent-warning);
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+      font-size: 0.85rem;
+    }
+    .holiday-banner .text { color: var(--accent-warning); font-weight: 600; }
+    .holiday-banner .rate { font-family: 'Space Mono', monospace; color: var(--accent-pink); }
+
+    .no-schedule { color: var(--accent-warning); font-size: 0.8rem; margin-top: 14px; padding: 12px; background: rgba(255, 170, 0, 0.1); border-radius: 10px; text-align: center; }
+
+    .rest-day-notice {
+      background: rgba(170, 102, 255, 0.15);
+      border: 1px solid var(--accent-purple);
+      border-radius: 16px;
+      padding: 30px;
+      text-align: center;
+      margin-top: 14px;
+    }
+    .rest-day-notice .icon { font-size: 2.5rem; margin-bottom: 10px; }
+    .rest-day-notice .title { font-size: 1.2rem; font-weight: 600; color: var(--accent-purple); }
+    .rest-day-notice .subtitle { font-size: 0.8rem; color: var(--text-secondary); margin-top: 6px; }
+
+    .time-section {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .time-section h3 {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .time-section h3::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--accent-primary); }
+    .time-buttons { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+    .summary-section {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .summary-section h3 { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 14px; }
+    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .summary-card {
+      background: var(--bg-elevated);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+    .summary-card .value { font-family: 'Space Mono', monospace; font-size: 1.1rem; font-weight: 700; color: var(--accent-primary); }
+    .summary-card .label { font-size: 0.55rem; color: var(--text-secondary); text-transform: uppercase; margin-top: 4px; }
+    .summary-card.overtime .value { color: var(--accent-warning); }
+    .summary-card.late .value { color: var(--accent-danger); }
+    .summary-card.payroll .value { color: var(--accent-secondary); }
+
+    .history-section {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .history-section h3 { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 14px; }
+    .history-list { max-height: 300px; overflow-y: auto; }
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: var(--bg-elevated);
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+    .history-item .date { font-family: 'Space Mono', monospace; font-size: 0.8rem; }
+    .history-item .hours { font-size: 0.75rem; color: var(--text-secondary); }
+    .history-item .pay { font-family: 'Space Mono', monospace; font-size: 0.85rem; color: var(--accent-secondary); }
+    .history-item .late-indicator { font-size: 0.6rem; color: var(--accent-danger); }
+
+    .tab-nav {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      background: var(--bg-elevated);
+      padding: 4px;
+      border-radius: 12px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-family: 'Sora', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .tab-btn.active { background: var(--gradient-accent); color: var(--bg-dark); }
+
+    .employee-list { display: flex; flex-direction: column; gap: 12px; }
+    .employee-card {
+      background: var(--bg-elevated);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .employee-card .emp-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .employee-card .emp-name { font-weight: 600; font-size: 0.95rem; }
+    .employee-card .emp-id { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--accent-primary); }
+    .employee-card .emp-rate { font-size: 0.7rem; color: var(--text-secondary); }
+    .employee-card .emp-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color); }
+    .employee-card .stat { text-align: center; }
+    .employee-card .stat-value { font-family: 'Space Mono', monospace; font-weight: 600; font-size: 0.8rem; }
+    .employee-card .stat-label { font-size: 0.5rem; color: var(--text-muted); text-transform: uppercase; }
+
+    .add-form { background: var(--bg-card); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .add-form h3 { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 14px; }
+    .add-form .btn { width: 100%; margin-top: 10px; }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.55rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .status-badge.work { background: rgba(0, 255, 136, 0.2); color: var(--accent-primary); }
+    .status-badge.rest { background: rgba(170, 102, 255, 0.2); color: var(--accent-purple); }
+    .status-badge.vl { background: rgba(0, 204, 255, 0.2); color: var(--accent-secondary); }
+
+    .success-toast {
+      position: fixed;
+      bottom: calc(30px + var(--safe-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent-primary);
+      color: var(--bg-dark);
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      z-index: 1000;
+      animation: fadeIn 0.3s;
+    }
+
+    .error-message { color: var(--accent-danger); font-size: 0.8rem; margin-top: 10px; text-align: center; }
+    .sync-indicator {
+      position: fixed;
+      top: calc(10px + var(--safe-top));
+      right: 10px;
+      background: var(--bg-card);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 100;
+    }
+    .sync-indicator.syncing { color: var(--accent-warning); }
+    .sync-indicator.synced { color: var(--accent-primary); }
+    .sync-indicator.offline { color: var(--accent-danger); }
+    .sync-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .sync-dot.syncing { background: var(--accent-warning); animation: pulse 1s infinite; }
+    .sync-dot.synced { background: var(--accent-primary); }
+    .sync-dot.offline { background: var(--accent-danger); }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal {
+      background: var(--bg-card);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      background: var(--bg-card);
+      z-index: 1;
+    }
+    .modal-header h2 { font-size: 1rem; }
+    .modal-close { background: none; border: none; color: var(--text-secondary); font-size: 1.5rem; padding: 0; }
+    .modal-body { padding: 20px; }
+
+    .calendar { background: var(--bg-elevated); border-radius: 14px; padding: 16px; }
+    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .calendar-header h3 { font-size: 0.95rem; }
+    .calendar-nav { display: flex; gap: 6px; }
+    .calendar-nav button { background: var(--bg-card); border: 1px solid var(--border-color); color: var(--text-primary); width: 32px; height: 32px; border-radius: 8px; font-size: 1rem; }
+    .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 6px; }
+    .calendar-weekdays span { text-align: center; font-size: 0.6rem; color: var(--text-muted); padding: 6px 0; }
+    .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .calendar-day {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-card);
+      border: 2px solid transparent;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-family: 'Space Mono', monospace;
+    }
+    .calendar-day.empty { background: transparent; }
+    .calendar-day.selected { border-color: var(--accent-purple); background: rgba(170, 102, 255, 0.2); }
+    .calendar-day.today { color: var(--accent-secondary); }
+    .calendar-day.has-schedule { background: rgba(0, 255, 136, 0.1); }
+    .calendar-day .day-type { font-size: 0.4rem; color: var(--text-muted); margin-top: 1px; }
+
+    .schedule-form { margin-top: 16px; padding: 16px; background: var(--bg-card); border-radius: 12px; }
+    .schedule-form h4 { font-size: 0.8rem; color: var(--accent-purple); margin-bottom: 14px; }
+    .schedule-types { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .schedule-type-btn {
+      padding: 8px 14px;
+      background: var(--bg-elevated);
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+    }
+    .schedule-type-btn.active { border-color: var(--accent-primary); color: var(--accent-primary); }
+
+    .map-container { height: 250px; border-radius: 12px; overflow: hidden; margin-top: 16px; }
+
+    .install-prompt {
+      position: fixed;
+      bottom: calc(20px + var(--safe-bottom));
+      left: 20px;
+      right: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--accent-primary);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 999;
+      animation: fadeIn 0.3s;
+    }
+    .install-prompt .text { flex: 1; }
+    .install-prompt .title { font-weight: 600; font-size: 0.9rem; }
+    .install-prompt .desc { font-size: 0.75rem; color: var(--text-secondary); }
+    .install-prompt .btn { padding: 10px 16px; }
+    .install-prompt .dismiss { background: none; border: none; color: var(--text-muted); font-size: 1.2rem; }
+
+    @media (max-width: 380px) {
+      .time-display .time { font-size: 2.5rem; }
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useRef, useCallback } = React;
+
+    // ============================================================
+    // CONFIGURATION - SET YOUR GOOGLE APPS SCRIPT URL HERE
+    // ============================================================
+    const getApiUrl = () => localStorage.getItem('timetrack_api_url') || '';
+
+    // API Helper
+    const api = {
+      async call(action, params = {}, postData = null) {
+        const url = new URL(getApiUrl());
+        url.searchParams.set('action', action);
+        Object.entries(params).forEach(([k, v]) => { if (v) url.searchParams.set(k, v); });
+
+        const options = { method: postData ? 'POST' : 'GET' };
+        if (postData) options.body = JSON.stringify(postData);
+
+        const response = await fetch(url.toString(), options);
+        return response.json();
+      }
+    };
+
+    // Philippine Holidays
+    const getHolidays = (year) => {
+      const h = { regular: [], special: [] };
+      h.regular.push({ date: `${year}-01-01`, name: "New Year" }, { date: `${year}-04-09`, name: "Araw ng Kagitingan" }, { date: `${year}-05-01`, name: "Labor Day" }, { date: `${year}-06-12`, name: "Independence" }, { date: `${year}-11-30`, name: "Bonifacio Day" }, { date: `${year}-12-25`, name: "Christmas" }, { date: `${year}-12-30`, name: "Rizal Day" });
+      h.special.push({ date: `${year}-08-21`, name: "Ninoy Aquino" }, { date: `${year}-11-01`, name: "All Saints" }, { date: `${year}-12-31`, name: "New Year's Eve" });
+      return h;
+    };
+
+    const isHoliday = (dateStr) => {
+      const year = parseInt(dateStr.split('-')[0]);
+      const h = getHolidays(year);
+      const reg = h.regular.find(x => x.date === dateStr);
+      const spec = h.special.find(x => x.date === dateStr);
+      if (reg) return { type: 'regular', name: reg.name, rate: 2.0 };
+      if (spec) return { type: 'special', name: spec.name, rate: 1.3 };
+      return null;
+    };
+
+    // Utilities
+    const formatTime = (d) => d ? new Date(d).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : '--:--';
+    const formatTime24 = (t) => { if (!t) return '--:--'; const [h, m] = t.split(':'); return `${h % 12 || 12}:${m} ${h >= 12 ? 'PM' : 'AM'}`; };
+    const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const getDateKey = (d = new Date()) => new Date(d).toISOString().split('T')[0];
+    const timeToMin = (t) => { if (!t) return 0; const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+    const calcHours = (s, e) => s && e ? Math.max(0, (new Date(e) - new Date(s)) / 3600000) : 0;
+    const getLateMin = (actual, sched) => { if (!actual || !sched) return 0; const a = new Date(actual); return Math.max(0, (a.getHours() * 60 + a.getMinutes()) - timeToMin(sched)); };
+    const getAfternoonLateMin = (mOut, aIn) => { if (!mOut || !aIn) return 0; return Math.max(0, Math.floor((new Date(aIn) - new Date(mOut)) / 60000 - 60)); };
+
+    const calcPay = (rec, sched, emp, date) => {
+      const r = { basic: 0, ot: 0, deduct: 0, holiday: 0, net: 0, mLate: 0, aLate: 0, totalLate: 0, otMin: 0, workMin: 0 };
+      if (!sched || sched.type !== 'WORK') {
+        if (sched?.type === 'VL') { r.basic = emp.hourlyRate * 8; r.net = r.basic; }
+        return r;
+      }
+      if (!rec) return r;
+
+      const perMin = (emp.hourlyRate * 8) / 480;
+      const hol = isHoliday(date);
+      const mMin = rec.morningIn && rec.morningOut ? calcHours(rec.morningIn, rec.morningOut) * 60 : 0;
+      const aMin = rec.afternoonIn && rec.afternoonOut ? calcHours(rec.afternoonIn, rec.afternoonOut) * 60 : 0;
+      r.workMin = mMin + aMin;
+      r.mLate = getLateMin(rec.morningIn, sched.morningIn);
+      r.aLate = getAfternoonLateMin(rec.morningOut, rec.afternoonIn);
+      r.totalLate = r.mLate + r.aLate;
+      r.otMin = Math.max(0, r.workMin - 480);
+      r.basic = (Math.min(r.workMin, 480) / 60) * emp.hourlyRate;
+      r.deduct = r.totalLate * perMin;
+      r.ot = (r.otMin / 60) * emp.hourlyRate * 1.25;
+      if (hol && r.workMin > 0) r.holiday = hol.type === 'regular' ? r.basic : r.basic * 0.3;
+      r.net = Math.max(0, r.basic + r.ot + r.holiday - r.deduct);
+      return r;
+    };
+
+    // Setup Screen
+    const SetupScreen = ({ onSetup }) => {
+      const [url, setUrl] = useState('');
+      const [error, setError] = useState('');
+      const [testing, setTesting] = useState(false);
+
+      const testConnection = async () => {
+        setTesting(true);
+        setError('');
+        try {
+          const testUrl = new URL(url);
+          testUrl.searchParams.set('action', 'getEmployees');
+          const res = await fetch(testUrl.toString());
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            localStorage.setItem('timetrack_api_url', url);
+            onSetup();
+          } else if (data.error) {
+            setError(data.error);
+          } else {
+            setError('Invalid response from server');
+          }
+        } catch (e) {
+          setError('Connection failed. Check the URL and try again.');
+        }
+        setTesting(false);
+      };
+
+      return (
+        <div className="setup-screen">
+          <div className="setup-card">
+            <h2>⚙️ Setup TimeTrack Pro</h2>
+            <p>Paste your Google Apps Script Web App URL below. This connects the app to your Google Sheets database.</p>
+            <p style={{ fontSize: '0.75rem', color: 'var(--accent-secondary)' }}>
+              Don't have one yet? Follow the setup instructions in the google-apps-script.js file.
+            </p>
+            <div className="input-group">
+              <label>Google Apps Script URL</label>
+              <textarea
+                value={url}
+                onChange={e => setUrl(e.target.value)}
+                placeholder="https://script.google.com/macros/s/xxx/exec"
+              />
+            </div>
+            {error && <p className="error-message">{error}</p>}
+            <button className="btn btn-primary" style={{ width: '100%' }} onClick={testConnection} disabled={testing || !url}>
+              {testing ? 'Testing...' : 'Connect'}
+            </button>
+          </div>
+        </div>
+      );
+    };
+
+    // Loading Screen
+    const LoadingScreen = () => (
+      <div className="loading-screen">
+        <div className="loading-spinner"></div>
+        <p className="loading-text">Loading data...</p>
+      </div>
+    );
+
+    // Sync Indicator
+    const SyncIndicator = ({ status }) => (
+      <div className={`sync-indicator ${status}`}>
+        <div className={`sync-dot ${status}`}></div>
+        {status === 'syncing' && 'Syncing...'}
+        {status === 'synced' && 'Synced'}
+        {status === 'offline' && 'Offline'}
+      </div>
+    );
+
+    // Time Button
+    const TimeButton = ({ label, time, onClick, disabled, isLate, lateMin, hasLoc }) => (
+      <button className={`btn-time ${time ? (isLate ? 'late' : 'recorded') : ''}`} onClick={onClick} disabled={disabled}>
+        <span className="time-value">{time ? formatTime(time) : '--:--'}</span>
+        <span className="time-label">{label}</span>
+        {time && isLate && <span className="badge late-badge">LATE {lateMin}m</span>}
+        {time && hasLoc && <span className="badge loc-badge">📍</span>}
+      </button>
+    );
+
+    // Employee Dashboard
+    const Dashboard = ({ employee, attendance, schedules, onRecordTime, onLogout, syncStatus }) => {
+      const [now, setNow] = useState(new Date());
+      const today = getDateKey();
+
+      useEffect(() => {
+        const t = setInterval(() => setNow(new Date()), 1000);
+        return () => clearInterval(t);
+      }, []);
+
+      const todayRec = attendance.find(a => a.empId === employee.id && a.date === today) || {};
+      const todaySched = schedules.find(s => s.empId === employee.id && s.date === today);
+      const holiday = isHoliday(today);
+      const pay = calcPay(todayRec, todaySched, employee, today);
+
+      const history = attendance.filter(a => a.empId === employee.id).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 10);
+
+      if (todaySched && todaySched.type !== 'WORK') {
+        const types = { REST: ['😴', 'Rest Day'], VL: ['🏖️', 'Vacation Leave'], LWOP: ['📋', 'LWOP'], SUSPENSION: ['⚠️', 'Suspension'] };
+        const [icon, title] = types[todaySched.type] || ['📅', todaySched.type];
+        return (
+          <div className="app-container">
+            <SyncIndicator status={syncStatus} />
+            <div className="header">
+              <h1>TimeTrack</h1>
+              <button className="btn btn-secondary btn-logout" onClick={onLogout}>Logout</button>
+            </div>
+            <div className="time-display">
+              <div className="date">{formatDate(now)}</div>
+              <div className="time">{now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}</div>
+              <div className="rest-day-notice">
+                <div className="icon">{icon}</div>
+                <div className="title">{title}</div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="app-container">
+          <SyncIndicator status={syncStatus} />
+          <div className="header">
+            <div>
+              <h1>TimeTrack</h1>
+              <div className="user-info"><div className="emp-id">{employee.id}</div></div>
+            </div>
+            <button className="btn btn-secondary btn-logout" onClick={onLogout}>Logout</button>
+          </div>
+
+          <div className="time-display">
+            <div className="date">{formatDate(now)}</div>
+            <div className="time">{now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })}</div>
+            {todaySched ? (
+              <div className="schedule-info">
+                <div className="schedule-item"><div className="label">Sched In</div><div className="value">{formatTime24(todaySched.morningIn)}</div></div>
+                <div className="schedule-item"><div className="label">Rate</div><div className="value">₱{employee.hourlyRate}/hr</div></div>
+              </div>
+            ) : <div className="no-schedule">⚠️ No schedule for today</div>}
+            {holiday && <div className="holiday-banner"><span className="text">{holiday.name}</span><span className="rate">({holiday.type === 'regular' ? '200%' : '130%'})</span></div>}
+          </div>
+
+          <div className="time-section">
+            <h3>Morning</h3>
+            <div className="time-buttons">
+              <TimeButton label="Time In" time={todayRec.morningIn} onClick={() => onRecordTime('morningIn')} disabled={!!todayRec.morningIn || !todaySched} isLate={pay.mLate > 0} lateMin={pay.mLate} hasLoc={todayRec.morningInLat} />
+              <TimeButton label="Time Out" time={todayRec.morningOut} onClick={() => onRecordTime('morningOut')} disabled={!todayRec.morningIn || !!todayRec.morningOut} />
+            </div>
+          </div>
+
+          <div className="time-section">
+            <h3>Afternoon</h3>
+            <div className="time-buttons">
+              <TimeButton label="Time In" time={todayRec.afternoonIn} onClick={() => onRecordTime('afternoonIn')} disabled={!!todayRec.afternoonIn || !todayRec.morningOut} isLate={pay.aLate > 0} lateMin={pay.aLate} hasLoc={todayRec.afternoonInLat} />
+              <TimeButton label="Time Out" time={todayRec.afternoonOut} onClick={() => onRecordTime('afternoonOut')} disabled={!todayRec.afternoonIn || !!todayRec.afternoonOut} />
+            </div>
+          </div>
+
+          <div className="summary-section">
+            <h3>Today's Summary</h3>
+            <div className="summary-grid">
+              <div className="summary-card"><div className="value">{(pay.workMin / 60).toFixed(1)}</div><div className="label">Hours</div></div>
+              <div className="summary-card late"><div className="value">{pay.totalLate}</div><div className="label">Late (min)</div></div>
+              <div className="summary-card payroll"><div className="value">₱{pay.net.toFixed(0)}</div><div className="label">Net Pay</div></div>
+            </div>
+          </div>
+
+          <div className="history-section">
+            <h3>Recent</h3>
+            <div className="history-list">
+              {history.map(rec => {
+                const sched = schedules.find(s => s.empId === employee.id && s.date === rec.date);
+                const p = calcPay(rec, sched, employee, rec.date);
+                return (
+                  <div key={rec.date} className="history-item">
+                    <div>
+                      <div className="date">{rec.date}</div>
+                      <div className="hours">{(p.workMin / 60).toFixed(1)} hrs {p.totalLate > 0 && <span className="late-indicator">({p.totalLate}m late)</span>}</div>
+                    </div>
+                    <div className="pay">₱{p.net.toFixed(0)}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // Admin Panel
+    const AdminPanel = ({ employees, attendance, schedules, onAddEmployee, onSetSchedule, onLogout, syncStatus }) => {
+      const [tab, setTab] = useState('employees');
+      const [newEmp, setNewEmp] = useState({ name: '', position: '', hourlyRate: '' });
+      const [schedModal, setSchedModal] = useState(false);
+      const [schedEmp, setSchedEmp] = useState('');
+      const [schedDate, setSchedDate] = useState(getDateKey());
+      const [schedType, setSchedType] = useState('WORK');
+      const [schedTime, setSchedTime] = useState('08:00');
+      const [toast, setToast] = useState('');
+      const today = getDateKey();
+
+      const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 2500); };
+
+      const handleAddEmployee = async () => {
+        if (!newEmp.name || !newEmp.hourlyRate) return;
+        await onAddEmployee(newEmp);
+        setNewEmp({ name: '', position: '', hourlyRate: '' });
+        showToast('Employee added!');
+      };
+
+      const handleSetSchedule = async () => {
+        if (!schedEmp || !schedDate) return;
+        await onSetSchedule({ empId: schedEmp, date: schedDate, type: schedType, morningIn: schedType === 'WORK' ? schedTime : '' });
+        showToast('Schedule saved!');
+      };
+
+      const getStats = (empId) => {
+        const recs = attendance.filter(a => a.empId === empId);
+        const emp = employees.find(e => e.id === empId);
+        let hours = 0, late = 0, net = 0;
+        recs.forEach(rec => {
+          const sched = schedules.find(s => s.empId === empId && s.date === rec.date);
+          const p = calcPay(rec, sched, emp, rec.date);
+          hours += p.workMin / 60;
+          late += p.totalLate;
+          net += p.net;
+        });
+        return { hours, late, net, days: recs.length };
+      };
+
+      return (
+        <div className="app-container">
+          <SyncIndicator status={syncStatus} />
+          <div className="header">
+            <div><h1>TimeTrack</h1><span style={{ fontSize: '0.7rem', color: 'var(--accent-warning)' }}>ADMIN</span></div>
+            <button className="btn btn-secondary btn-logout" onClick={onLogout}>Logout</button>
+          </div>
+
+          <div className="tab-nav">
+            <button className={`tab-btn ${tab === 'employees' ? 'active' : ''}`} onClick={() => setTab('employees')}>Employees</button>
+            <button className={`tab-btn ${tab === 'add' ? 'active' : ''}`} onClick={() => setTab('add')}>Add New</button>
+          </div>
+
+          {tab === 'employees' && (
+            <>
+              <button className="btn btn-schedule" style={{ width: '100%', marginBottom: '16px' }} onClick={() => setSchedModal(true)}>📅 Set Schedule</button>
+              <div className="employee-list">
+                {employees.map(emp => {
+                  const s = getStats(emp.id);
+                  const todaySched = schedules.find(x => x.empId === emp.id && x.date === today);
+                  return (
+                    <div key={emp.id} className="employee-card">
+                      <div className="emp-header">
+                        <div>
+                          <div className="emp-name">{emp.name}</div>
+                          <div className="emp-id">{emp.id}</div>
+                          <div className="emp-rate">{emp.position} • ₱{emp.hourlyRate}/hr</div>
+                        </div>
+                        {todaySched && <span className={`status-badge ${todaySched.type.toLowerCase()}`}>{todaySched.type}</span>}
+                      </div>
+                      <div className="emp-stats">
+                        <div className="stat"><div className="stat-value">{s.days}</div><div className="stat-label">Days</div></div>
+                        <div className="stat"><div className="stat-value">{s.hours.toFixed(0)}</div><div className="stat-label">Hours</div></div>
+                        <div className="stat"><div className="stat-value" style={{ color: 'var(--accent-danger)' }}>{s.late}</div><div className="stat-label">Late</div></div>
+                        <div className="stat"><div className="stat-value" style={{ color: 'var(--accent-secondary)' }}>₱{s.net.toFixed(0)}</div><div className="stat-label">Net</div></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {tab === 'add' && (
+            <div className="add-form">
+              <h3>Add Employee</h3>
+              <div className="input-group"><label>Name</label><input value={newEmp.name} onChange={e => setNewEmp({ ...newEmp, name: e.target.value })} /></div>
+              <div className="input-group"><label>Position</label><input value={newEmp.position} onChange={e => setNewEmp({ ...newEmp, position: e.target.value })} /></div>
+              <div className="input-group"><label>Hourly Rate (₱)</label><input type="number" value={newEmp.hourlyRate} onChange={e => setNewEmp({ ...newEmp, hourlyRate: e.target.value })} /></div>
+              <button className="btn btn-primary" onClick={handleAddEmployee}>Add Employee</button>
+            </div>
+          )}
+
+          {schedModal && (
+            <div className="modal-overlay" onClick={() => setSchedModal(false)}>
+              <div className="modal" onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                  <h2>📅 Set Schedule</h2>
+                  <button className="modal-close" onClick={() => setSchedModal(false)}>×</button>
+                </div>
+                <div className="modal-body">
+                  <div className="input-group">
+                    <label>Employee</label>
+                    <select value={schedEmp} onChange={e => setSchedEmp(e.target.value)}>
+                      <option value="">Select...</option>
+                      {employees.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+                    </select>
+                  </div>
+                  <div className="input-group">
+                    <label>Date</label>
+                    <input type="date" value={schedDate} onChange={e => setSchedDate(e.target.value)} />
+                  </div>
+                  <div className="schedule-form">
+                    <h4>Schedule Type</h4>
+                    <div className="schedule-types">
+                      {['WORK', 'REST', 'VL', 'LWOP', 'SUSPENSION'].map(t => (
+                        <button key={t} className={`schedule-type-btn ${schedType === t ? 'active' : ''}`} onClick={() => setSchedType(t)}>{t}</button>
+                      ))}
+                    </div>
+                    {schedType === 'WORK' && (
+                      <div className="input-group"><label>Morning In</label><input type="time" value={schedTime} onChange={e => setSchedTime(e.target.value)} /></div>
+                    )}
+                    <button className="btn btn-primary" style={{ width: '100%', marginTop: '16px' }} onClick={handleSetSchedule}>Save Schedule</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {toast && <div className="success-toast">{toast}</div>}
+        </div>
+      );
+    };
+
+    // Login Screen
+    const LoginScreen = ({ employees, onLogin, onAdminLogin }) => {
+      const [id, setId] = useState('');
+      const [mode, setMode] = useState('employee');
+      const [error, setError] = useState('');
+
+      const handleLogin = () => {
+        if (mode === 'employee') {
+          const emp = employees.find(e => e.id.toUpperCase() === id.toUpperCase());
+          if (emp) onLogin(emp);
+          else setError('Employee not found');
+        } else {
+          if (id === 'ADMIN') onAdminLogin();
+          else setError('Invalid password');
+        }
+      };
+
+      return (
+        <div className="login-container">
+          <div className="login-card">
+            <div className="logo">
+              <h1>TimeTrack</h1>
+              <p>Employee Attendance</p>
+            </div>
+
+            <div className="tab-nav">
+              <button className={`tab-btn ${mode === 'employee' ? 'active' : ''}`} onClick={() => { setMode('employee'); setError(''); }}>Employee</button>
+              <button className={`tab-btn ${mode === 'admin' ? 'active' : ''}`} onClick={() => { setMode('admin'); setError(''); }}>Admin</button>
+            </div>
+
+            <div className="input-group">
+              <label>{mode === 'employee' ? 'Employee ID' : 'Password'}</label>
+              <input
+                type={mode === 'admin' ? 'password' : 'text'}
+                value={id}
+                onChange={e => { setId(e.target.value); setError(''); }}
+                onKeyPress={e => e.key === 'Enter' && handleLogin()}
+                placeholder={mode === 'employee' ? 'EMP-001' : '••••••'}
+              />
+            </div>
+
+            {error && <p className="error-message">{error}</p>}
+
+            <button className="btn btn-primary" style={{ width: '100%' }} onClick={handleLogin}>
+              {mode === 'employee' ? 'Clock In' : 'Login'}
+            </button>
+
+            <div style={{ marginTop: '20px', padding: '14px', background: 'var(--bg-elevated)', borderRadius: '12px' }}>
+              <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '8px' }}>Demo:</p>
+              {mode === 'employee' ? (
+                employees.slice(0, 3).map(e => (
+                  <p key={e.id} style={{ fontFamily: 'Space Mono', fontSize: '0.75rem', color: 'var(--accent-primary)' }}>{e.id} - {e.name}</p>
+                ))
+              ) : (
+                <p style={{ fontFamily: 'Space Mono', fontSize: '0.75rem', color: 'var(--accent-warning)' }}>Password: ADMIN</p>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // Main App
+    const App = () => {
+      const [configured, setConfigured] = useState(!!getApiUrl());
+      const [loading, setLoading] = useState(true);
+      const [syncStatus, setSyncStatus] = useState('synced');
+      const [employees, setEmployees] = useState([]);
+      const [attendance, setAttendance] = useState([]);
+      const [schedules, setSchedules] = useState([]);
+      const [user, setUser] = useState(null);
+      const [view, setView] = useState('login');
+      const [toast, setToast] = useState('');
+
+      const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 2500); };
+
+      const loadData = async () => {
+        if (!getApiUrl()) return;
+        setLoading(true);
+        setSyncStatus('syncing');
+        try {
+          const data = await api.call('getAllData');
+          setEmployees(data.employees || []);
+          setAttendance(data.attendance || []);
+          setSchedules(data.schedules || []);
+          setSyncStatus('synced');
+        } catch (e) {
+          setSyncStatus('offline');
+        }
+        setLoading(false);
+      };
+
+      useEffect(() => {
+        if (configured) loadData();
+      }, [configured]);
+
+      const recordTime = async (field) => {
+        const today = getDateKey();
+        const now = new Date().toISOString();
+        setSyncStatus('syncing');
+
+        let lat, lng;
+        if (field === 'morningIn' || field === 'afternoonIn') {
+          try {
+            const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 10000 }));
+            lat = pos.coords.latitude;
+            lng = pos.coords.longitude;
+          } catch (e) { /* no location */ }
+        }
+
+        try {
+          await api.call('recordTime', {}, { empId: user.id, date: today, field, value: now, lat, lng });
+          await loadData();
+          showToast('Time recorded!');
+        } catch (e) {
+          setSyncStatus('offline');
+          showToast('Failed to sync');
+        }
+      };
+
+      const addEmployee = async (data) => {
+        setSyncStatus('syncing');
+        try {
+          await api.call('addEmployee', {}, data);
+          await loadData();
+        } catch (e) {
+          setSyncStatus('offline');
+        }
+      };
+
+      const setSchedule = async (data) => {
+        setSyncStatus('syncing');
+        try {
+          await api.call('setSchedule', {}, data);
+          await loadData();
+        } catch (e) {
+          setSyncStatus('offline');
+        }
+      };
+
+      const logout = () => { setUser(null); setView('login'); };
+
+      if (!configured) return <SetupScreen onSetup={() => setConfigured(true)} />;
+      if (loading) return <LoadingScreen />;
+
+      if (view === 'admin') return <AdminPanel employees={employees} attendance={attendance} schedules={schedules} onAddEmployee={addEmployee} onSetSchedule={setSchedule} onLogout={logout} syncStatus={syncStatus} />;
+      if (view === 'employee' && user) return <Dashboard employee={user} attendance={attendance} schedules={schedules} onRecordTime={recordTime} onLogout={logout} syncStatus={syncStatus} />;
+
+      return (
+        <>
+          <LoginScreen employees={employees} onLogin={e => { setUser(e); setView('employee'); }} onAdminLogin={() => setView('admin')} />
+          {toast && <div className="success-toast">{toast}</div>}
+        </>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+
+    // Service Worker Registration for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        // Create inline service worker
+        const swCode = `
+          const CACHE_NAME = 'timetrack-v1';
+          const OFFLINE_URL = '/';
+          
+          self.addEventListener('install', event => {
+            self.skipWaiting();
+          });
+          
+          self.addEventListener('activate', event => {
+            event.waitUntil(clients.claim());
+          });
+          
+          self.addEventListener('fetch', event => {
+            if (event.request.mode === 'navigate') {
+              event.respondWith(fetch(event.request).catch(() => caches.match(OFFLINE_URL)));
+            }
+          });
+        `;
+        
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(blob);
+        
+        navigator.serviceWorker.register(swUrl).catch(err => console.log('SW registration failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>
