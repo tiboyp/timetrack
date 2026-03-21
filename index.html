@@ -932,7 +932,7 @@
           if (emp) onLogin(emp);
           else setError('Employee not found');
         } else {
-          if (id === 'ADMIN') onAdminLogin();
+          if (id === 'Albert14$') onAdminLogin();
           else setError('Invalid password');
         }
       };
@@ -967,16 +967,6 @@
               {mode === 'employee' ? 'Clock In' : 'Login'}
             </button>
 
-            <div style={{ marginTop: '20px', padding: '14px', background: 'var(--bg-elevated)', borderRadius: '12px' }}>
-              <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginBottom: '8px' }}>Demo:</p>
-              {mode === 'employee' ? (
-                employees.slice(0, 3).map(e => (
-                  <p key={e.id} style={{ fontFamily: 'Space Mono', fontSize: '0.75rem', color: 'var(--accent-primary)' }}>{e.id} - {e.name}</p>
-                ))
-              ) : (
-                <p style={{ fontFamily: 'Space Mono', fontSize: '0.75rem', color: 'var(--accent-warning)' }}>Password: ADMIN</p>
-              )}
-            </div>
           </div>
         </div>
       );
