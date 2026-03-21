@@ -190,7 +190,24 @@ const api={async call(action,params={},postData=null){const url=new URL(getApiUr
 const getHolidays=(year)=>{const h={regular:[],special:[]};h.regular.push({date:`${year}-01-01`,name:"New Year"},{date:`${year}-04-09`,name:"Araw ng Kagitingan"},{date:`${year}-05-01`,name:"Labor Day"},{date:`${year}-06-12`,name:"Independence"},{date:`${year}-11-30`,name:"Bonifacio Day"},{date:`${year}-12-25`,name:"Christmas"},{date:`${year}-12-30`,name:"Rizal Day"});h.special.push({date:`${year}-08-21`,name:"Ninoy Aquino"},{date:`${year}-11-01`,name:"All Saints"},{date:`${year}-12-31`,name:"New Year's Eve"});return h};
 const isHoliday=(d)=>{const y=parseInt(d.split('-')[0]);const h=getHolidays(y);const r=h.regular.find(x=>x.date===d);const s=h.special.find(x=>x.date===d);if(r)return{type:'regular',name:r.name};if(s)return{type:'special',name:s.name};return null};
 const formatTime=(d)=>d?new Date(d).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true}):'--:--';
-const formatTime24=(t)=>{if(!t)return'--:--';const[h,m]=t.split(':');return`${h%12||12}:${m} ${h>=12?'PM':'AM'}`};
+const formatTime24=(t)=>{
+  if(!t)return'--:--';
+  // Handle if it's already a time string like "17:00"
+  if(typeof t==='string'&&t.includes(':')){
+    const[h,m]=t.split(':').map(Number);
+    return`${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;
+  }
+  // Handle if Google Sheets converted it to a Date
+  try{
+    const date=new Date(t);
+    if(!isNaN(date.getTime())){
+      const h=date.getHours();
+      const m=date.getMinutes();
+      return`${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;
+    }
+  }catch(e){}
+  return'--:--';
+};
 const formatDate=(d)=>new Date(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
 const getDateKey=(d=new Date())=>new Date(d).toISOString().split('T')[0];
 
@@ -201,10 +218,13 @@ const normalizeDate=(d)=>{
   try{
     const date=new Date(d);
     if(isNaN(date.getTime()))return String(d);
-    return date.toISOString().split('T')[0];
+    // Use LOCAL date, not UTC
+    const year=date.getFullYear();
+    const month=String(date.getMonth()+1).padStart(2,'0');
+    const day=String(date.getDate()).padStart(2,'0');
+    return `${year}-${month}-${day}`;
   }catch(e){return String(d)}
 };
-
 const timeToMin=(t)=>{if(!t)return 0;const[h,m]=t.split(':').map(Number);return h*60+m};
 const calcHours=(s,e)=>s&&e?Math.max(0,(new Date(e)-new Date(s))/3600000):0;
 const getLateMin=(actual,sched)=>{if(!actual||!sched)return 0;const a=new Date(actual);return Math.max(0,(a.getHours()*60+a.getMinutes())-timeToMin(sched))};
