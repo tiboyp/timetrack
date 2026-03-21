@@ -189,43 +189,86 @@ const api={async call(action,params={},postData=null){const url=new URL(getApiUr
 
 const getHolidays=(year)=>{const h={regular:[],special:[]};h.regular.push({date:`${year}-01-01`,name:"New Year"},{date:`${year}-04-09`,name:"Araw ng Kagitingan"},{date:`${year}-05-01`,name:"Labor Day"},{date:`${year}-06-12`,name:"Independence"},{date:`${year}-11-30`,name:"Bonifacio Day"},{date:`${year}-12-25`,name:"Christmas"},{date:`${year}-12-30`,name:"Rizal Day"});h.special.push({date:`${year}-08-21`,name:"Ninoy Aquino"},{date:`${year}-11-01`,name:"All Saints"},{date:`${year}-12-31`,name:"New Year's Eve"});return h};
 const isHoliday=(d)=>{const y=parseInt(d.split('-')[0]);const h=getHolidays(y);const r=h.regular.find(x=>x.date===d);const s=h.special.find(x=>x.date===d);if(r)return{type:'regular',name:r.name};if(s)return{type:'special',name:s.name};return null};
-const formatTime=(d)=>d?new Date(d).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true}):'--:--';
+
+// Format clock time from ISO string
+const formatTime=(d)=>{
+  if(!d)return'--:--';
+  try{
+    const date=new Date(d);
+    if(isNaN(date.getTime()))return'--:--';
+    return date.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true});
+  }catch(e){return'--:--'}
+};
+
+// Format schedule time (handles both "HH:MM" string and Date objects)
 const formatTime24=(t)=>{
   if(!t)return'--:--';
-  // Handle if it's already a time string like "17:00"
-  if(typeof t==='string'&&t.includes(':')){
-    const[h,m]=t.split(':').map(Number);
-    return`${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;
+  // If it's a string like "10:00" or "17:30"
+  if(typeof t==='string'){
+    if(t.includes(':')){
+      const parts=t.split(':');
+      const h=parseInt(parts[0],10);
+      const m=parts[1]||'00';
+      if(isNaN(h))return'--:--';
+      const hour=h%12||12;
+      const ampm=h>=12?'PM':'AM';
+      return`${hour}:${m.toString().padStart(2,'0')} ${ampm}`;
+    }
   }
-  // Handle if Google Sheets converted it to a Date
+  // If it's a Date object or date string
   try{
     const date=new Date(t);
     if(!isNaN(date.getTime())){
       const h=date.getHours();
       const m=date.getMinutes();
-      return`${h%12||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;
+      const hour=h%12||12;
+      const ampm=h>=12?'PM':'AM';
+      return`${hour}:${String(m).padStart(2,'0')} ${ampm}`;
     }
   }catch(e){}
   return'--:--';
 };
-const formatDate=(d)=>new Date(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-const getDateKey=(d=new Date())=>new Date(d).toISOString().split('T')[0];
 
-// FIX: Normalize dates from Google Sheets (handles different formats)
+const formatDate=(d)=>new Date(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+
+// Get today's date in YYYY-MM-DD format (LOCAL timezone)
+const getDateKey=(d=new Date())=>{
+  const date=d instanceof Date?d:new Date(d);
+  const year=date.getFullYear();
+  const month=String(date.getMonth()+1).padStart(2,'0');
+  const day=String(date.getDate()).padStart(2,'0');
+  return`${year}-${month}-${day}`;
+};
+
+// Normalize any date format to YYYY-MM-DD
 const normalizeDate=(d)=>{
   if(!d)return'';
   if(typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d))return d;
   try{
     const date=new Date(d);
     if(isNaN(date.getTime()))return String(d);
-    // Use LOCAL date, not UTC
     const year=date.getFullYear();
     const month=String(date.getMonth()+1).padStart(2,'0');
     const day=String(date.getDate()).padStart(2,'0');
-    return `${year}-${month}-${day}`;
+    return`${year}-${month}-${day}`;
   }catch(e){return String(d)}
 };
-const timeToMin=(t)=>{if(!t)return 0;const[h,m]=t.split(':').map(Number);return h*60+m};
+
+const timeToMin=(t)=>{
+  if(!t)return 0;
+  if(typeof t==='string'&&t.includes(':')){
+    const[h,m]=t.split(':').map(Number);
+    return h*60+(m||0);
+  }
+  try{
+    const date=new Date(t);
+    if(!isNaN(date.getTime())){
+      return date.getHours()*60+date.getMinutes();
+    }
+  }catch(e){}
+  return 0;
+};
+
 const calcHours=(s,e)=>s&&e?Math.max(0,(new Date(e)-new Date(s))/3600000):0;
 const getLateMin=(actual,sched)=>{if(!actual||!sched)return 0;const a=new Date(actual);return Math.max(0,(a.getHours()*60+a.getMinutes())-timeToMin(sched))};
 const getAfternoonLateMin=(mOut,aIn)=>{if(!mOut||!aIn)return 0;return Math.max(0,Math.floor((new Date(aIn)-new Date(mOut))/60000-60))};
@@ -251,14 +294,12 @@ const hol=isHoliday(today);
 const pay=calcPay(rec,sched,employee,today);
 const history=attendance.filter(a=>a.empId===employee.id).sort((a,b)=>normalizeDate(b.date).localeCompare(normalizeDate(a.date))).slice(0,10);
 
-// Check if it's a non-work schedule (REST, VL, etc.)
 if(sched&&sched.type!=='WORK'){
   const types={REST:['😴','Rest Day'],VL:['🏖️','Vacation Leave'],LWOP:['📋','LWOP'],SUSPENSION:['⚠️','Suspension']};
   const[icon,title]=types[sched.type]||['📅',sched.type];
   return<div className="app-container"><SyncIndicator status={syncStatus}/><div className="header"><h1>TimeTrack</h1><button className="btn btn-secondary btn-small" onClick={onLogout}>Logout</button></div><div className="page-content"><div className="time-display"><div className="date">{formatDate(now)}</div><div className="time">{now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false})}</div><div className="rest-notice"><div className="icon">{icon}</div><div className="title">{title}</div></div></div></div></div>
 }
 
-// Normal work day OR no schedule (can still clock in)
 return<div className="app-container"><SyncIndicator status={syncStatus}/><div className="header"><h1>TimeTrack</h1><button className="btn btn-secondary btn-small" onClick={onLogout}>Logout</button></div><div className="page-content"><div className="time-display"><div className="date">{formatDate(now)}</div><div className="time">{now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false})}</div>
 {sched?<div className="schedule-info"><div className="schedule-item"><div className="label">Time In</div><div className="value">{formatTime24(sched.morningIn)}</div></div><div className="schedule-item"><div className="label">Branch</div><div className="value">{sched.branch||'N/A'}</div></div><div className="schedule-item"><div className="label">Rate</div><div className="value">₱{employee.hourlyRate}/hr</div></div></div>
 :<div className="no-schedule-notice">📋 No schedule assigned - You can still clock in</div>}
@@ -305,7 +346,6 @@ const today=getDateKey();
 const activeEmps=employees.filter(e=>(e.status||'Active')==='Active');
 const filteredEmps=employees.filter(e=>{const s=(e.status||'Active').toLowerCase();if(empFilter==='all')return true;return s===empFilter});
 
-// FIX: Use normalizeDate for filtering schedules
 const todayScheds=schedules.filter(s=>normalizeDate(s.date)===today);
 const workingToday=todayScheds.filter(s=>s.type==='WORK');
 const presentToday=attendance.filter(a=>normalizeDate(a.date)===today&&a.morningIn);
@@ -445,7 +485,7 @@ return<div className="app-container">
 {toast&&<div className="success-toast">{toast}</div>}
 </div>};
 
-const LoginScreen=({employees,onLogin,onAdminLogin})=>{const[id,setId]=useState('');const[mode,setMode]=useState('employee');const[error,setError]=useState('');const handleLogin=()=>{if(mode==='employee'){const emp=employees.find(e=>e.id.toUpperCase()===id.toUpperCase());if(!emp){setError('Employee not found');return}if((emp.status||'Active')!=='Active'){setError(`Account is ${emp.status}`);return}onLogin(emp)}else{if(id===ADMIN_PASSWORD)onAdminLogin();else setError('Invalid password')}};return<div className="login-container"><div className="login-card"><div className="logo"><h1>TimeTrack</h1><p>Employee Attendance</p></div><div className="tab-toggle"><button className={mode==='employee'?'active':''} onClick={()=>{setMode('employee');setError('')}}>Employee</button><button className={mode==='admin'?'active':''} onClick={()=>{setMode('admin');setError('')}}>Admin</button></div><div className="input-group"><label>{mode==='employee'?'Employee ID':'Password'}</label><input type={mode==='admin'?'password':'text'} value={id} onChange={e=>{setId(e.target.value);setError('')}} onKeyPress={e=>e.key==='Enter'&&handleLogin()} placeholder={mode==='employee'?'EMP-XXXXXX':'••••••'}/></div>{error&&<p className="error-message">{error}</p>}<button className="btn btn-primary" style={{width:'100%'}} onClick={handleLogin}>{mode==='employee'?'Clock In':'Login'}</button></div></div>};
+const LoginScreen=({employees,onLogin,onAdminLogin})=>{const[id,setId]=useState('');const[mode,setMode]=useState('employee');const[error,setError]=useState('');const handleLogin=()=>{if(mode==='employee'){const emp=employees.find(e=>e.id.toUpperCase()===id.toUpperCase());if(!emp){setError('Employee not found');return}if((emp.status||'Active')!=='Active'){setError(`Account is ${emp.status}`);return}onLogin(emp)}else{if(id===ADMIN_PASSWORD)onAdminLogin();else setError('Invalid password')}};return<div className="login-container"><div className="login-card"><div className="logo"><h1>TimeTrack</h1><p>Employee Attendance</p></div><div className="tab-toggle"><button className={mode==='employee'?'active':''} onClick={()=>{setMode('employee');setError('')}}>Employee</button><button className={mode==='admin'?'active':''} onClick={()=>{setMode('admin');setError('')}}>Admin</button></div><div className="input-group"><label>{mode==='employee'?'Employee ID':'Password'}</label><input type={mode==='admin'?'password':'text'} value={id} onChange={e=>{setId(e.target.value);setError('')}} onKeyPress={e=>e.key==='Enter'&&handleLogin()} placeholder={mode==='employee'?'EMP-XXXXXX':'••••••'} autoComplete="off"/></div>{error&&<p className="error-message">{error}</p>}<button className="btn btn-primary" style={{width:'100%'}} onClick={handleLogin}>{mode==='employee'?'Clock In':'Login'}</button></div></div>};
 
 const App=()=>{
 const[configured,setConfigured]=useState(!!getApiUrl());
@@ -461,7 +501,26 @@ const[view,setView]=useState('login');
 const loadData=async()=>{if(!getApiUrl())return;setLoading(true);setSyncStatus('syncing');try{const data=await api.call('getAllData');setEmployees(data.employees||[]);setAttendance(data.attendance||[]);setSchedules(data.schedules||[]);setBranches(data.branches||[]);setSyncStatus('synced')}catch(e){setSyncStatus('offline')}setLoading(false)};
 useEffect(()=>{if(configured)loadData()},[configured]);
 
-const recordTime=async(field)=>{const today=getDateKey();const now=new Date().toISOString();setSyncStatus('syncing');let lat,lng;if(field==='morningIn'||field==='afternoonIn'){try{const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{enableHighAccuracy:true,timeout:10000}));lat=pos.coords.latitude;lng=pos.coords.longitude}catch(e){}}try{await api.call('recordTime',{},{empId:user.id,date:today,field,value:now,lat,lng});await loadData()}catch(e){setSyncStatus('offline')}};
+const recordTime=async(field)=>{
+  const today=getDateKey();
+  const now=new Date().toISOString();
+  setSyncStatus('syncing');
+  let lat,lng;
+  if(field==='morningIn'||field==='afternoonIn'){
+    try{
+      const pos=await new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{enableHighAccuracy:true,timeout:10000}));
+      lat=pos.coords.latitude;
+      lng=pos.coords.longitude;
+    }catch(e){}
+  }
+  try{
+    await api.call('recordTime',{},{empId:user.id,date:today,field,value:now,lat,lng});
+    await loadData();
+  }catch(e){
+    setSyncStatus('offline');
+  }
+};
+
 const addEmployee=async(data)=>{setSyncStatus('syncing');try{await api.call('addEmployee',{},data);await loadData()}catch(e){setSyncStatus('offline')}};
 const setSchedule=async(data)=>{setSyncStatus('syncing');try{await api.call('setSchedule',{},data);await loadData()}catch(e){setSyncStatus('offline')}};
 const updateStatus=async(empId,status)=>{setSyncStatus('syncing');try{await api.call('updateEmployeeStatus',{},{id:empId,status});await loadData()}catch(e){setSyncStatus('offline')}};
