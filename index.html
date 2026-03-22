@@ -94,135 +94,152 @@
     .calendar-weekdays{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:8px}
     .calendar-weekdays span{text-align:center;font-size:.6rem;color:var(--text-muted);padding:8px 0;font-weight:600}
     .calendar-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-    .calendar-day{min-height:65px;display:flex;flex-direction:column;align-items:center;padding:6px 2px;background:var(--bg-card);border:2px solid transparent;border-radius:8px;font-size:.75rem;cursor:pointer}
+    .calendar-day{background:var(--bg-card);border-radius:8px;padding:8px 4px;min-height:60px;cursor:pointer;position:relative;transition:all .2s}
+    .calendar-day:active{transform:scale(.95)}
     .calendar-day.empty{background:transparent;cursor:default}
-    .calendar-day.today{border-color:var(--accent-secondary)}
-    .calendar-day.selected{border-color:var(--accent-primary);background:rgba(0,255,136,.1)}
-    .calendar-day.has-schedule{background:rgba(0,255,136,.08)}
-    .calendar-day.has-attendance{border-color:var(--accent-secondary)}
-    .calendar-day.rest{background:rgba(170,102,255,.1)}
-    .calendar-day .day-num{font-weight:700;margin-bottom:2px}
-    .calendar-day .day-info{font-size:.5rem;color:var(--accent-primary);text-align:center;line-height:1.2}
-    .calendar-day .day-branch{font-size:.45rem;color:var(--accent-secondary);margin-top:1px;max-width:100%;overflow:hidden;text-overflow:ellipsis}
-    .calendar-day .day-type{font-size:.5rem;color:var(--accent-purple);font-weight:600}
-    .calendar-day .day-present{font-size:.5rem;color:var(--accent-primary);margin-top:2px}
-    .schedule-types{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
-    .schedule-type-btn{padding:10px 16px;background:var(--bg-card);border:2px solid var(--border-color);border-radius:10px;color:var(--text-secondary);font-size:.8rem;cursor:pointer}
-    .schedule-type-btn.active{border-color:var(--accent-primary);color:var(--accent-primary);background:rgba(0,255,136,.1)}
-    .emp-select-list{display:flex;flex-direction:column;gap:8px;max-height:200px;overflow-y:auto}
-    .emp-select-item{background:var(--bg-elevated);border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
-    .emp-select-item.selected{background:rgba(0,255,136,.1);border:1px solid var(--accent-primary)}
-    .emp-select-item .name{font-weight:500}
-    .emp-select-item .id{font-family:'Space Mono',monospace;font-size:.7rem;color:var(--accent-secondary)}
-    .today-list{display:flex;flex-direction:column;gap:8px}
-    .today-item{background:var(--bg-elevated);border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center}
-    .today-item .emp-info .name{font-weight:500;font-size:.9rem}
-    .today-item .emp-info .branch{font-size:.7rem;color:var(--accent-secondary)}
-    .today-item .time{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--accent-primary)}
-    .today-item .no-sched{font-size:.75rem;color:var(--text-muted)}
-    .branch-list{display:flex;flex-direction:column;gap:10px}
-    .branch-item{background:var(--bg-elevated);border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center}
-    .branch-item .info h4{font-size:.9rem;margin-bottom:4px}
-    .branch-item .info p{font-size:.7rem;color:var(--text-secondary)}
-    .add-form{background:var(--bg-card);border-radius:16px;padding:20px;margin-bottom:16px}
-    .add-form h3{font-size:.8rem;color:var(--text-secondary);margin-bottom:16px;text-transform:uppercase}
-    .success-toast{position:fixed;bottom:calc(90px + var(--safe-bottom));left:50%;transform:translateX(-50%);background:var(--accent-primary);color:var(--bg-dark);padding:12px 24px;border-radius:30px;font-weight:600;font-size:.85rem;z-index:300;animation:fadeIn .3s}
-    .error-message{color:var(--accent-danger);font-size:.8rem;margin-top:10px;text-align:center}
-    .sync-indicator{position:fixed;top:calc(10px + var(--safe-top));right:10px;background:var(--bg-card);padding:6px 12px;border-radius:20px;font-size:.7rem;display:flex;align-items:center;gap:6px;z-index:100}
-    .sync-indicator.synced{color:var(--accent-primary)}
-    .sync-indicator.syncing{color:var(--accent-warning)}
-    .sync-indicator.offline{color:var(--accent-danger)}
-    .sync-dot{width:8px;height:8px;border-radius:50%}
-    .sync-dot.synced{background:var(--accent-primary)}
-    .sync-dot.syncing{background:var(--accent-warning);animation:pulse 1s infinite}
-    .sync-dot.offline{background:var(--accent-danger)}
+    .calendar-day.today{border:2px solid var(--accent-primary)}
+    .calendar-day.selected{background:var(--accent-primary);color:var(--bg-dark)}
+    .calendar-day.has-schedule{background:var(--bg-elevated)}
+    .calendar-day.has-attendance{border-left:3px solid var(--accent-primary)}
+    .calendar-day.rest{background:rgba(255,170,0,.1)}
+    .calendar-day .day-num{font-size:.75rem;font-weight:600;text-align:center}
+    .calendar-day .day-info{font-size:.5rem;color:var(--accent-secondary);text-align:center;margin-top:2px}
+    .calendar-day .day-branch{font-size:.45rem;color:var(--text-muted);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .calendar-day .day-type{font-size:.5rem;color:var(--accent-warning);text-align:center;margin-top:2px}
+    .calendar-day .day-present{position:absolute;top:2px;right:2px;font-size:.5rem}
     .tab-toggle{display:flex;background:var(--bg-elevated);border-radius:12px;padding:4px;margin-bottom:20px}
-    .tab-toggle button{flex:1;padding:12px;background:transparent;border:none;border-radius:8px;color:var(--text-secondary);font-size:.8rem;font-weight:500;cursor:pointer}
+    .tab-toggle button{flex:1;padding:10px;border:none;background:transparent;color:var(--text-secondary);font-size:.8rem;font-weight:500;cursor:pointer;border-radius:10px}
     .tab-toggle button.active{background:var(--gradient-accent);color:var(--bg-dark)}
-    .filter-pills{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:8px}
-    .filter-pill{padding:8px 16px;background:var(--bg-elevated);border:1px solid var(--border-color);border-radius:20px;color:var(--text-secondary);font-size:.75rem;white-space:nowrap;cursor:pointer}
-    .filter-pill.active{border-color:var(--accent-primary);color:var(--accent-primary);background:rgba(0,255,136,.1)}
+    .filter-pills{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+    .filter-pill{padding:8px 14px;background:var(--bg-elevated);border-radius:20px;font-size:.7rem;cursor:pointer;transition:all .2s}
+    .filter-pill.active{background:var(--gradient-accent);color:var(--bg-dark)}
+    .add-form{background:var(--bg-card);border-radius:16px;padding:20px}
+    .add-form h3{margin-bottom:16px;font-size:.9rem}
+    .emp-select-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+    .emp-select-item{background:var(--bg-elevated);border:2px solid transparent;border-radius:12px;padding:12px 16px;cursor:pointer;transition:all .2s}
+    .emp-select-item.selected{border-color:var(--accent-primary);background:rgba(0,255,136,.1)}
+    .emp-select-item .name{font-size:.85rem;font-weight:600}
+    .emp-select-item .id{font-size:.65rem;color:var(--text-muted);font-family:'Space Mono',monospace}
+    .schedule-types{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+    .schedule-type-btn{padding:10px 16px;background:var(--bg-elevated);border:2px solid var(--border-color);border-radius:10px;color:var(--text-secondary);font-size:.75rem;font-weight:600;cursor:pointer}
+    .schedule-type-btn.active{border-color:var(--accent-primary);background:rgba(0,255,136,.1);color:var(--accent-primary)}
+    .today-list{display:flex;flex-direction:column;gap:10px}
+    .today-item{background:var(--bg-card);border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center}
+    .today-item .emp-info .name{font-weight:600;font-size:.85rem}
+    .today-item .emp-info .branch{font-size:.7rem;color:var(--text-muted);margin-top:2px}
+    .today-item .time{font-family:'Space Mono',monospace;color:var(--accent-primary);font-size:.8rem}
+    .today-item .no-sched{color:var(--text-muted);font-size:.75rem}
+    .branch-list{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+    .branch-item{background:var(--bg-card);border-radius:12px;padding:14px;display:flex;justify-content:space-between;align-items:center}
+    .branch-item .info h4{font-size:.85rem;margin-bottom:4px}
+    .branch-item .info p{font-size:.7rem;color:var(--text-muted)}
     .empty-state{text-align:center;padding:40px 20px;color:var(--text-muted)}
-    .empty-state .icon{font-size:3rem;margin-bottom:16px}
-    .empty-state p{font-size:.9rem}
-    .btn-time{padding:20px;border-radius:16px;display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;background:var(--bg-elevated);border:2px solid var(--border-color);color:var(--text-primary);cursor:pointer}
-    .btn-time:disabled{opacity:.5}
-    .btn-time.recorded{background:rgba(0,255,136,.1);border-color:var(--accent-primary);color:var(--accent-primary)}
-    .btn-time.late{background:rgba(255,68,102,.1);border-color:var(--accent-danger);color:var(--accent-danger)}
-    .btn-time .time-value{font-family:'Space Mono',monospace;font-size:1.4rem;font-weight:700}
-    .btn-time .time-label{font-size:.65rem;text-transform:uppercase;letter-spacing:1px;opacity:.8}
-    .btn-time .badge{font-size:.6rem;padding:3px 10px;border-radius:20px;margin-top:4px}
-    .btn-time .badge.late-badge{background:var(--accent-danger);color:#fff}
-    .btn-time .badge.loc-badge{background:var(--accent-secondary);color:var(--bg-dark)}
-    .time-section{background:var(--bg-card);border-radius:16px;padding:20px;margin-bottom:16px}
-    .time-section h3{font-size:.75rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:2px;margin-bottom:14px}
-    .time-buttons{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .empty-state .icon{font-size:2rem;margin-bottom:10px}
+    .error-message{color:var(--accent-danger);font-size:.8rem;margin-bottom:16px;text-align:center}
+    .success-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--accent-primary);color:var(--bg-dark);padding:12px 24px;border-radius:30px;font-weight:600;font-size:.85rem;z-index:300;animation:fadeIn .3s ease-out}
+    .sync-indicator{position:fixed;top:8px;right:8px;display:flex;align-items:center;gap:6px;font-size:.6rem;color:var(--text-muted);z-index:60;background:var(--bg-card);padding:4px 10px;border-radius:20px}
+    .sync-dot{width:6px;height:6px;border-radius:50%;background:var(--accent-primary)}
+    .sync-dot.syncing{animation:pulse 1s infinite;background:var(--accent-warning)}
+    .sync-dot.offline{background:var(--accent-danger)}
+    .time-display{text-align:center;padding:30px 0}
+    .time-display .date{font-size:.85rem;color:var(--text-secondary);margin-bottom:8px}
+    .time-display .time{font-family:'Space Mono',monospace;font-size:3.5rem;font-weight:700;background:var(--gradient-accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .time-display .schedule-info{display:flex;justify-content:center;gap:20px;margin-top:16px}
+    .time-display .schedule-item{text-align:center}
+    .time-display .schedule-item .label{font-size:.65rem;color:var(--text-muted);text-transform:uppercase}
+    .time-display .schedule-item .value{font-size:.9rem;font-weight:600;color:var(--accent-secondary)}
+    .time-display .no-schedule-notice{margin-top:16px;padding:12px;background:rgba(255,170,0,.1);border-radius:10px;color:var(--accent-warning);font-size:.8rem}
+    .time-display .rest-notice{margin-top:20px;padding:20px;background:var(--bg-card);border-radius:16px}
+    .time-display .rest-notice .icon{font-size:2rem;margin-bottom:8px}
+    .time-display .rest-notice .title{font-size:1.1rem;font-weight:600;color:var(--accent-warning)}
+    .time-section{margin-bottom:24px}
+    .time-section h3{font-size:.8rem;color:var(--text-secondary);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+    .time-buttons{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .btn-time{background:var(--bg-card);border:2px solid var(--border-color);border-radius:16px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+    .btn-time:disabled{opacity:.5;cursor:not-allowed}
+    .btn-time.recorded{border-color:var(--accent-primary);background:rgba(0,255,136,.05)}
+    .btn-time.late{border-color:var(--accent-danger);background:rgba(255,68,102,.05)}
+    .btn-time .time-value{display:block;font-family:'Space Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--text-primary);margin-bottom:4px}
+    .btn-time .time-label{font-size:.7rem;color:var(--text-secondary);text-transform:uppercase}
+    .btn-time .badge{position:absolute;top:-8px;right:-8px;padding:4px 8px;border-radius:10px;font-size:.55rem;font-weight:700}
+    .btn-time .late-badge{background:var(--accent-danger);color:white}
+    .btn-time .loc-badge{background:var(--accent-secondary);color:var(--bg-dark)}
     .summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    .summary-card{background:var(--bg-elevated);border-radius:12px;padding:14px;text-align:center}
-    .summary-card .value{font-family:'Space Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--accent-primary)}
-    .summary-card .label{font-size:.55rem;color:var(--text-secondary);text-transform:uppercase;margin-top:4px}
+    .summary-card{background:var(--bg-card);border-radius:12px;padding:16px;text-align:center}
+    .summary-card .value{font-family:'Space Mono',monospace;font-size:1.4rem;font-weight:700}
+    .summary-card .label{font-size:.6rem;color:var(--text-secondary);margin-top:4px;text-transform:uppercase}
     .summary-card.late .value{color:var(--accent-danger)}
-    .summary-card.pay .value{color:var(--accent-secondary)}
-    .time-display{text-align:center;padding:24px;background:var(--bg-card);border-radius:20px;margin-bottom:20px}
-    .time-display .date{font-size:.85rem;color:var(--text-secondary);text-transform:uppercase;letter-spacing:2px}
-    .time-display .time{font-family:'Space Mono',monospace;font-size:3rem;font-weight:700;background:var(--gradient-accent);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:10px 0}
-    .schedule-info{display:flex;justify-content:center;gap:20px;padding-top:14px;border-top:1px solid var(--border-color);flex-wrap:wrap}
-    .schedule-item{text-align:center}
-    .schedule-item .label{font-size:.6rem;color:var(--text-muted);text-transform:uppercase}
-    .schedule-item .value{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--accent-secondary);margin-top:2px}
-    .rest-notice{background:rgba(170,102,255,.15);border:1px solid var(--accent-purple);border-radius:16px;padding:30px;text-align:center;margin-top:14px}
-    .rest-notice .icon{font-size:2.5rem;margin-bottom:10px}
-    .rest-notice .title{font-size:1.2rem;font-weight:600;color:var(--accent-purple)}
-    .no-schedule-notice{color:var(--accent-secondary);font-size:.8rem;margin-top:14px;padding:12px;background:rgba(0,204,255,0.1);border-radius:10px;text-align:center}
-    .history-list{max-height:250px;overflow-y:auto}
-    .history-item{display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--bg-elevated);border-radius:10px;margin-bottom:8px}
-    .history-item .date{font-family:'Space Mono',monospace;font-size:.8rem}
-    .history-item .hours{font-size:.75rem;color:var(--text-secondary)}
-    .history-item .pay{font-family:'Space Mono',monospace;font-size:.85rem;color:var(--accent-secondary)}
+    .summary-card.pay .value{color:var(--accent-primary)}
+    .history-list{display:flex;flex-direction:column;gap:8px}
+    .history-item{background:var(--bg-card);border-radius:10px;padding:12px;display:flex;justify-content:space-between;align-items:center}
+    .history-item .date{font-size:.8rem;font-weight:500}
+    .history-item .hours{font-size:.7rem;color:var(--text-muted)}
+    .history-item .pay{font-family:'Space Mono',monospace;color:var(--accent-primary);font-weight:600}
+    .clock-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+    .clock-card{background:var(--bg-elevated);border-radius:12px;padding:14px;text-align:center}
+    .clock-card .clock-label{font-size:.65rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px}
+    .clock-card .clock-time{font-family:'Space Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--accent-primary)}
+    .clock-card .clock-time.empty{color:var(--text-muted)}
+    .clock-card.late .clock-time{color:var(--accent-danger)}
+    .att-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
+    .att-stat{background:var(--bg-card);border-radius:12px;padding:14px;text-align:center}
+    .att-stat .value{font-family:'Space Mono',monospace;font-size:1.4rem;font-weight:700}
+    .att-stat .label{font-size:.6rem;color:var(--text-secondary);margin-top:4px;text-transform:uppercase}
+    .att-stat.hours .value{color:var(--accent-primary)}
+    .att-stat.late .value{color:var(--accent-danger)}
+    .att-stat.ot .value{color:var(--accent-secondary)}
+    .att-stat.pay .value{color:var(--accent-warning)}
+    .location-section{margin-top:20px}
+    .location-section h4{font-size:.75rem;color:var(--text-secondary);margin-bottom:12px;text-transform:uppercase}
+    .location-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .location-card{background:var(--bg-elevated);border-radius:12px;overflow:hidden}
+    .location-card .loc-header{padding:10px;text-align:center;font-size:.7rem;color:var(--accent-secondary);text-transform:uppercase;border-bottom:1px solid var(--border-color)}
+    .location-card .loc-map{height:120px;background:var(--bg-card)}
+    .location-card .loc-map iframe{width:100%;height:100%;border:none}
+    .location-card .loc-coords{padding:8px;font-size:.6rem;color:var(--text-muted);text-align:center;font-family:'Space Mono',monospace}
+    .location-card .loc-link{display:block;padding:10px;text-align:center;background:var(--bg-card);color:var(--accent-primary);text-decoration:none;font-size:.7rem;font-weight:600}
+    .location-card .no-loc{padding:40px 10px;text-align:center;color:var(--text-muted);font-size:.75rem}
     .payroll-emp-list{display:flex;flex-direction:column;gap:10px}
-    .payroll-emp-item{background:var(--bg-elevated);border-radius:14px;padding:16px;cursor:pointer;transition:all .2s;display:flex;justify-content:space-between;align-items:center}
-    .payroll-emp-item:active{transform:scale(.99)}
+    .payroll-emp-item{background:var(--bg-card);border-radius:14px;padding:16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .2s}
+    .payroll-emp-item:active{transform:scale(.98)}
     .payroll-emp-item .emp-info .name{font-weight:600;font-size:.95rem}
-    .payroll-emp-item .emp-info .position{font-size:.7rem;color:var(--text-secondary);margin-top:2px}
-    .payroll-emp-item .emp-rate{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--accent-primary)}
+    .payroll-emp-item .emp-info .position{font-size:.75rem;color:var(--text-secondary);margin-top:2px}
+    .payroll-emp-item .emp-rate{font-family:'Space Mono',monospace;color:var(--accent-primary);font-size:.85rem}
     .payroll-summary{background:var(--bg-elevated);border-radius:16px;padding:20px;margin-bottom:20px}
-    .payroll-summary h3{font-size:.8rem;color:var(--accent-secondary);margin-bottom:16px;text-transform:uppercase;text-align:center}
+    .payroll-summary h3{font-size:.85rem;text-align:center;margin-bottom:8px;color:var(--accent-secondary)}
     .payroll-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
     .payroll-stat{background:var(--bg-card);border-radius:12px;padding:14px;text-align:center}
-    .payroll-stat .value{font-family:'Space Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--accent-primary)}
+    .payroll-stat .value{font-family:'Space Mono',monospace;font-size:1.2rem;font-weight:700;color:var(--accent-primary)}
     .payroll-stat .label{font-size:.6rem;color:var(--text-secondary);margin-top:4px;text-transform:uppercase}
-    .payroll-stat.warning .value{color:var(--accent-warning)}
     .payroll-stat.danger .value{color:var(--accent-danger)}
+    .payroll-stat.warning .value{color:var(--accent-warning)}
     .payroll-stat.info .value{color:var(--accent-secondary)}
     .payroll-stat.highlight{grid-column:span 2;background:rgba(0,255,136,.1);border:1px solid var(--accent-primary)}
-    .payroll-stat.highlight .value{font-size:1.8rem}
+    .payroll-stat.highlight .value{font-size:1.6rem}
     .date-range-picker{background:var(--bg-card);border-radius:16px;padding:20px;margin-bottom:20px}
-    .date-range-picker h4{font-size:.75rem;color:var(--text-secondary);margin-bottom:12px;text-transform:uppercase}
+    .date-range-picker h4{font-size:.8rem;margin-bottom:16px;color:var(--text-secondary)}
     .payroll-table{width:100%;border-collapse:collapse;font-size:.75rem;margin-top:16px}
-    .payroll-table th,.payroll-table td{padding:10px 6px;text-align:left;border-bottom:1px solid var(--border-color)}
-    .payroll-table th{color:var(--text-secondary);font-weight:500;text-transform:uppercase;font-size:.65rem}
-    .payroll-table td{font-family:'Space Mono',monospace}
-    .payroll-table .text-right{text-align:right}
+    .payroll-table th,.payroll-table td{padding:10px 8px;text-align:left;border-bottom:1px solid var(--border-color)}
+    .payroll-table th{color:var(--text-muted);font-size:.65rem;text-transform:uppercase}
+    .payroll-table .text-right{text-align:right;font-family:'Space Mono',monospace}
     .payroll-table .total-row{background:var(--bg-elevated);font-weight:700}
     .payroll-table .total-row td{color:var(--accent-primary)}
-    .export-section{display:flex;gap:10px;margin-top:20px}
-    .export-section .btn{flex:1}
-    @media(max-width:380px){.time-display .time{font-size:2.5rem}.stat-grid{grid-template-columns:1fr}.summary-grid{grid-template-columns:repeat(2,1fr)}.payroll-stats{grid-template-columns:1fr}}
+    .export-section{margin-top:20px;text-align:center}
+    @media(max-width:380px){.time-display .time{font-size:2.5rem}.stat-grid{grid-template-columns:1fr}.summary-grid{grid-template-columns:repeat(2,1fr)}.payroll-stats{grid-template-columns:1fr}.location-grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
 const{useState,useEffect,useMemo}=React;
-
 const ADMIN_PASSWORD='Albert14$';
 const getApiUrl=()=>localStorage.getItem('timetrack_api_url')||'';
-const api={async call(action,params={},postData=null){const url=new URL(getApiUrl());url.searchParams.set('action',action);Object.entries(params).forEach(([k,v])=>{if(v)url.searchParams.set(k,v)});const options={method:postData?'POST':'GET'};if(postData)options.body=JSON.stringify(postData);const response=await fetch(url.toString(),options);return response.json()}};
+const api={call:async(action,params={},body=null)=>{const url=new URL(getApiUrl());url.searchParams.set('action',action);Object.entries(params).forEach(([k,v])=>url.searchParams.set(k,v));const opts={method:body?'POST':'GET'};if(body)opts.body=JSON.stringify(body);const res=await fetch(url.toString(),opts);return res.json()}};
 
-const getHolidays=(year)=>{const h={regular:[],special:[]};h.regular.push({date:`${year}-01-01`,name:"New Year"},{date:`${year}-04-09`,name:"Araw ng Kagitingan"},{date:`${year}-05-01`,name:"Labor Day"},{date:`${year}-06-12`,name:"Independence"},{date:`${year}-11-30`,name:"Bonifacio Day"},{date:`${year}-12-25`,name:"Christmas"},{date:`${year}-12-30`,name:"Rizal Day"});h.special.push({date:`${year}-08-21`,name:"Ninoy Aquino"},{date:`${year}-11-01`,name:"All Saints"},{date:`${year}-12-31`,name:"New Year's Eve"});return h};
-const isHoliday=(d)=>{if(!d)return null;const y=parseInt(d.split('-')[0]);const h=getHolidays(y);const r=h.regular.find(x=>x.date===d);const s=h.special.find(x=>x.date===d);if(r)return{type:'regular',name:r.name};if(s)return{type:'special',name:s.name};return null};
+const PH_HOLIDAYS={'01-01':{name:"New Year's Day",type:'regular'},'04-09':{name:'Araw ng Kagitingan',type:'regular'},'05-01':{name:'Labor Day',type:'regular'},'06-12':{name:'Independence Day',type:'regular'},'08-25':{name:"National Heroes' Day",type:'regular'},'11-30':{name:'Bonifacio Day',type:'regular'},'12-25':{name:'Christmas Day',type:'regular'},'12-30':{name:'Rizal Day',type:'regular'},'02-25':{name:'EDSA Revolution',type:'special'},'08-21':{name:'Ninoy Aquino Day',type:'special'},'11-01':{name:"All Saints' Day",type:'special'},'11-02':{name:"All Souls' Day",type:'special'},'12-08':{name:'Immaculate Conception',type:'special'},'12-24':{name:'Christmas Eve',type:'special'},'12-31':{name:"New Year's Eve",type:'special'}};
+const isHoliday=(date)=>{const d=new Date(date+'T12:00:00');const key=`${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;return PH_HOLIDAYS[key]||null};
 
-const formatTime=(d)=>{if(!d)return'--:--';try{const date=new Date(d);if(isNaN(date.getTime()))return'--:--';return date.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})}catch(e){return'--:--'}};
+const formatTime=(d)=>{if(!d)return'';try{const date=new Date(d);if(isNaN(date.getTime()))return'';return date.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:true})}catch(e){return''}};
 const formatTimeExcel=(d)=>{if(!d)return'';try{const date=new Date(d);if(isNaN(date.getTime()))return'';return date.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true})}catch(e){return''}};
 const formatTime24=(t)=>{if(!t)return'--:--';if(typeof t==='string'){if(t.includes(':')){const parts=t.split(':');const h=parseInt(parts[0],10);const m=parts[1]||'00';if(isNaN(h))return'--:--';const hour=h%12||12;const ampm=h>=12?'PM':'AM';return`${hour}:${m.toString().padStart(2,'0')} ${ampm}`}}try{const date=new Date(t);if(!isNaN(date.getTime())){const h=date.getHours();const m=date.getMinutes();const hour=h%12||12;const ampm=h>=12?'PM':'AM';return`${hour}:${String(m).padStart(2,'0')} ${ampm}`}}catch(e){}return'--:--'};
 const formatDate=(d)=>new Date(d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
@@ -243,19 +260,18 @@ const calcPay=(rec,sched,emp,date)=>{const r={basic:0,ot:0,deduct:0,holiday:0,ne
 const getMonthData=(year,month)=>{const firstDay=new Date(year,month,1).getDay();const daysInMonth=new Date(year,month+1,0).getDate();return{firstDay,daysInMonth}};
 const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
 
-// Excel Export Function
 const exportPayrollToExcel=(employee,dateFrom,dateTo,payrollData)=>{
   const wb=XLSX.utils.book_new();
-  const headerInfo=[['PAYROLL REPORT'],[''],['Employee Name:',employee.name],['Employee ID:',employee.id],['Position:',employee.position||''],['Hourly Rate:',`₱${employee.hourlyRate}`],['Period:',`${formatDateExcel(dateFrom)} - ${formatDateExcel(dateTo)}`],['Generated:',new Date().toLocaleString('en-US')],['']];
+  const headerInfo=[['PAYROLL REPORT'],[''],['Employee Name:',employee.name],['Employee ID:',employee.id],['Position:',employee.position||''],['Hourly Rate:','₱'+employee.hourlyRate],['Period:',formatDateExcel(dateFrom)+' - '+formatDateExcel(dateTo)],['Generated:',new Date().toLocaleString('en-US')],['']];
   const columnHeaders=['Date','Day','Schedule Type','Branch','Morning In','Morning Out','Afternoon In','Afternoon Out','Hours Worked','OT Hours','Minutes Late','Basic Pay','OT Pay','Holiday Pay','Deductions','Net Pay'];
   const dataRows=payrollData.days.map(d=>{const att=d.att||{};const dayName=new Date(d.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short'});return[formatDateExcel(d.date),dayName,d.sched?.type||'No Schedule',d.sched?.branch||'',formatTimeExcel(att.morningIn),formatTimeExcel(att.morningOut),formatTimeExcel(att.afternoonIn),formatTimeExcel(att.afternoonOut),(d.pay.workMin/60).toFixed(2),(d.pay.otMin/60).toFixed(2),d.pay.totalLate,d.pay.basic.toFixed(2),d.pay.ot.toFixed(2),d.pay.holiday.toFixed(2),d.pay.deduct.toFixed(2),d.pay.net.toFixed(2)]});
   const totalsRow=['TOTALS','','','','','','','',payrollData.totals.hours.toFixed(2),payrollData.totals.otHours.toFixed(2),payrollData.totals.late,payrollData.totals.basic.toFixed(2),payrollData.totals.ot.toFixed(2),payrollData.totals.holiday.toFixed(2),payrollData.totals.deduct.toFixed(2),payrollData.totals.net.toFixed(2)];
-  const summarySection=[[''],['SUMMARY'],['Days Worked:',payrollData.totals.daysWorked],['Total Hours:',payrollData.totals.hours.toFixed(2)],['Overtime Hours:',payrollData.totals.otHours.toFixed(2)],['Total Late (min):',payrollData.totals.late],[''],['Basic Pay:',`₱${payrollData.totals.basic.toFixed(2)}`],['Overtime Pay:',`₱${payrollData.totals.ot.toFixed(2)}`],['Holiday Pay:',`₱${payrollData.totals.holiday.toFixed(2)}`],['Late Deductions:',`-₱${payrollData.totals.deduct.toFixed(2)}`],[''],['NET PAY:',`₱${payrollData.totals.net.toFixed(2)}`]];
+  const summarySection=[[''],['SUMMARY'],['Days Worked:',payrollData.totals.daysWorked],['Total Hours:',payrollData.totals.hours.toFixed(2)],['Overtime Hours:',payrollData.totals.otHours.toFixed(2)],['Total Late (min):',payrollData.totals.late],[''],['Basic Pay:','₱'+payrollData.totals.basic.toFixed(2)],['Overtime Pay:','₱'+payrollData.totals.ot.toFixed(2)],['Holiday Pay:','₱'+payrollData.totals.holiday.toFixed(2)],['Late Deductions:','-₱'+payrollData.totals.deduct.toFixed(2)],[''],['NET PAY:','₱'+payrollData.totals.net.toFixed(2)]];
   const wsData=[...headerInfo,columnHeaders,...dataRows,totalsRow,...summarySection];
   const ws=XLSX.utils.aoa_to_sheet(wsData);
   ws['!cols']=[{wch:12},{wch:6},{wch:12},{wch:15},{wch:12},{wch:12},{wch:12},{wch:12},{wch:10},{wch:10},{wch:10},{wch:12},{wch:10},{wch:12},{wch:12},{wch:12}];
   XLSX.utils.book_append_sheet(wb,ws,'Payroll');
-  const fileName=`Payroll_${employee.name.replace(/\s+/g,'_')}_${dateFrom}_to_${dateTo}.xlsx`;
+  const fileName='Payroll_'+employee.name.replace(/\s+/g,'_')+'_'+dateFrom+'_to_'+dateTo+'.xlsx';
   XLSX.writeFile(wb,fileName);
 };
 
@@ -264,9 +280,96 @@ const LoadingScreen=()=><div className="loading-screen"><div className="loading-
 const SyncIndicator=({status})=><div className={`sync-indicator ${status}`}><div className={`sync-dot ${status}`}/>{status==='syncing'?'Syncing...':status==='synced'?'Synced':'Offline'}</div>;
 const TimeButton=({label,time,onClick,disabled,isLate,lateMin,hasLoc})=><button className={`btn-time ${time?(isLate?'late':'recorded'):''}`} onClick={onClick} disabled={disabled}><span className="time-value">{time?formatTime(time):'--:--'}</span><span className="time-label">{label}</span>{time&&isLate&&<span className="badge late-badge">LATE {lateMin}m</span>}{time&&hasLoc&&<span className="badge loc-badge">📍</span>}</button>;
 
-const ScheduleCalendar=({schedules,attendance,year,month,selectedDate,onDayClick,showAttendance})=>{const{firstDay,daysInMonth}=getMonthData(year,month);const today=getDateKey();const days=[];for(let i=0;i<firstDay;i++)days.push(<div key={`e${i}`} className="calendar-day empty"/>);for(let d=1;d<=daysInMonth;d++){const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;const sc=schedules.find(s=>normalizeDate(s.date)===ds);const att=attendance?.find(a=>normalizeDate(a.date)===ds);const isToday=ds===today;const isSel=ds===selectedDate;const hasAtt=att&&att.morningIn;days.push(<div key={d} className={`calendar-day ${isToday?'today':''} ${isSel?'selected':''} ${sc?'has-schedule':''} ${hasAtt&&showAttendance?'has-attendance':''} ${sc&&sc.type!=='WORK'?'rest':''}`} onClick={()=>onDayClick&&onDayClick(ds)}><div className="day-num">{d}</div>{sc&&sc.type==='WORK'&&<><div className="day-info">{formatTime24(sc.morningIn)}</div><div className="day-branch">{sc.branch||''}</div></>}{sc&&sc.type!=='WORK'&&<div className="day-type">{sc.type}</div>}{hasAtt&&showAttendance&&<div className="day-present">✅</div>}</div>)}return<div className="calendar"><div className="calendar-weekdays">{['S','M','T','W','T','F','S'].map((d,i)=><span key={i}>{d}</span>)}</div><div className="calendar-days">{days}</div></div>};
+const ScheduleCalendar=({schedules,attendance,year,month,selectedDate,onDayClick,showAttendance})=>{
+  const{firstDay,daysInMonth}=getMonthData(year,month);
+  const today=getDateKey();
+  const days=[];
+  for(let i=0;i<firstDay;i++)days.push(<div key={'e'+i} className="calendar-day empty"/>);
+  for(let d=1;d<=daysInMonth;d++){
+    const ds=year+'-'+String(month+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const sc=schedules.find(s=>normalizeDate(s.date)===ds);
+    const att=attendance?attendance.find(a=>normalizeDate(a.date)===ds):null;
+    const isToday=ds===today;
+    const isSel=ds===selectedDate;
+    const hasAtt=att&&att.morningIn;
+    days.push(
+      <div key={d} className={'calendar-day'+(isToday?' today':'')+(isSel?' selected':'')+(sc?' has-schedule':'')+(hasAtt&&showAttendance?' has-attendance':'')+(sc&&sc.type!=='WORK'?' rest':'')} onClick={()=>onDayClick&&onDayClick(ds)}>
+        <div className="day-num">{d}</div>
+        {sc&&sc.type==='WORK'&&<><div className="day-info">{formatTime24(sc.morningIn)}</div><div className="day-branch">{sc.branch||''}</div></>}
+        {sc&&sc.type!=='WORK'&&<div className="day-type">{sc.type}</div>}
+        {hasAtt&&showAttendance&&<div className="day-present">✅</div>}
+      </div>
+    );
+  }
+  return<div className="calendar"><div className="calendar-weekdays">{['S','M','T','W','T','F','S'].map((d,i)=><span key={i}>{d}</span>)}</div><div className="calendar-days">{days}</div></div>;
+};
 
-// Payroll Modal Component
+const AttendanceDetailModal=({employee,date,attendance,schedule,onClose})=>{
+  const att=attendance||{};
+  const pay=calcPay(att,schedule,employee,date);
+  const hol=isHoliday(date);
+  
+  const LocationCard=({label,lat,lng})=>{
+    if(!lat||!lng)return<div className="location-card"><div className="loc-header">{label}</div><div className="no-loc">📍 No location recorded</div></div>;
+    const mapUrl='https://www.openstreetmap.org/export/embed.html?bbox='+(lng-0.002)+','+(lat-0.002)+','+(lng+0.002)+','+(lat+0.002)+'&layer=mapnik&marker='+lat+','+lng;
+    const googleUrl='https://www.google.com/maps?q='+lat+','+lng;
+    return<div className="location-card">
+      <div className="loc-header">{label}</div>
+      <div className="loc-map"><iframe src={mapUrl} loading="lazy"/></div>
+      <div className="loc-coords">{lat.toFixed(6)}, {lng.toFixed(6)}</div>
+      <a href={googleUrl} target="_blank" rel="noopener noreferrer" className="loc-link">📍 Open in Google Maps</a>
+    </div>;
+  };
+  
+  return<div className="modal-overlay" onClick={onClose}><div className="modal" onClick={e=>e.stopPropagation()}><div className="modal-header"><h2>📋 Attendance Details</h2><button className="modal-close" onClick={onClose}>×</button></div><div className="modal-body">
+    <div style={{textAlign:'center',marginBottom:20}}>
+      <div style={{width:50,height:50,background:'var(--gradient-accent)',borderRadius:14,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto',fontSize:'1.3rem',fontWeight:700,color:'var(--bg-dark)'}}>{employee.name.charAt(0)}</div>
+      <h3 style={{marginTop:10,color:'var(--accent-primary)'}}>{employee.name}</h3>
+      <p style={{color:'var(--text-secondary)',fontSize:'.8rem'}}>{formatDateLong(date)}</p>
+      {schedule&&<p style={{color:'var(--accent-secondary)',fontSize:'.75rem',marginTop:4}}>{schedule.type==='WORK'?(schedule.branch||'No Branch')+' • '+formatTime24(schedule.morningIn):schedule.type}</p>}
+      {hol&&<p style={{color:'var(--accent-warning)',fontSize:'.75rem',marginTop:4}}>🎉 {hol.name} ({hol.type==='regular'?'200%':'130%'})</p>}
+    </div>
+    
+    <div className="clock-grid">
+      <div className={'clock-card'+(pay.mLate>0?' late':'')}>
+        <div className="clock-label">Morning In</div>
+        <div className={'clock-time'+(!att.morningIn?' empty':'')}>{att.morningIn?formatTime(att.morningIn):'--:--'}</div>
+        {pay.mLate>0&&<div style={{fontSize:'.65rem',color:'var(--accent-danger)',marginTop:4}}>Late {pay.mLate} min</div>}
+      </div>
+      <div className="clock-card">
+        <div className="clock-label">Morning Out</div>
+        <div className={'clock-time'+(!att.morningOut?' empty':'')}>{att.morningOut?formatTime(att.morningOut):'--:--'}</div>
+      </div>
+      <div className={'clock-card'+(pay.aLate>0?' late':'')}>
+        <div className="clock-label">Afternoon In</div>
+        <div className={'clock-time'+(!att.afternoonIn?' empty':'')}>{att.afternoonIn?formatTime(att.afternoonIn):'--:--'}</div>
+        {pay.aLate>0&&<div style={{fontSize:'.65rem',color:'var(--accent-danger)',marginTop:4}}>Late {pay.aLate} min</div>}
+      </div>
+      <div className="clock-card">
+        <div className="clock-label">Afternoon Out</div>
+        <div className={'clock-time'+(!att.afternoonOut?' empty':'')}>{att.afternoonOut?formatTime(att.afternoonOut):'--:--'}</div>
+      </div>
+    </div>
+    
+    <div className="att-stats">
+      <div className="att-stat hours"><div className="value">{(pay.workMin/60).toFixed(1)}</div><div className="label">Hours Worked</div></div>
+      <div className="att-stat late"><div className="value">{pay.totalLate}</div><div className="label">Minutes Late</div></div>
+      <div className="att-stat ot"><div className="value">{(pay.otMin/60).toFixed(1)}</div><div className="label">OT Hours</div></div>
+      <div className="att-stat pay"><div className="value">₱{pay.net.toFixed(0)}</div><div className="label">Net Pay</div></div>
+    </div>
+    
+    <div className="location-section">
+      <h4>📍 Clock-in Locations</h4>
+      <div className="location-grid">
+        <LocationCard label="Morning In" lat={att.morningInLat} lng={att.morningInLng}/>
+        <LocationCard label="Afternoon Out" lat={att.afternoonOutLat} lng={att.afternoonOutLng}/>
+      </div>
+    </div>
+    
+    {!att.morningIn&&<div style={{textAlign:'center',padding:20,color:'var(--text-muted)'}}><p>No attendance recorded for this date</p></div>}
+  </div></div></div>;
+};
+
 const PayrollModal=({employee,attendance,schedules,onClose})=>{
   const[dateFrom,setDateFrom]=useState(()=>{const d=new Date();d.setDate(d.getDate()-6);return getDateKey(d)});
   const[dateTo,setDateTo]=useState(getDateKey());
@@ -276,7 +379,6 @@ const PayrollModal=({employee,attendance,schedules,onClose})=>{
   const getAttendanceForDate=(date)=>attendance.find(a=>a.empId===employee.id&&normalizeDate(a.date)===date);
   const getScheduleForDate=(date)=>schedules.find(s=>s.empId===employee.id&&normalizeDate(s.date)===date);
   
-  // Calculate last 7 days summary
   const last7Days=useMemo(()=>{
     const dates=getLast7Days();
     let daysWorked=0,totalHours=0,totalLate=0,totalOT=0,totalDeduct=0,totalOTPay=0,totalNet=0;
@@ -295,7 +397,6 @@ const PayrollModal=({employee,attendance,schedules,onClose})=>{
     return{daysWorked,totalHours,totalLate,totalOT,totalDeduct,totalOTPay,totalNet,startDate:dates[0],endDate:dates[dates.length-1]};
   },[employee,attendance,schedules]);
   
-  // Generate custom range report
   const generateCustomReport=()=>{
     const dates=getDateRange(dateFrom,dateTo);
     const days=dates.map(date=>{
@@ -323,7 +424,6 @@ const PayrollModal=({employee,attendance,schedules,onClose})=>{
     if(customData){
       exportPayrollToExcel(employee,dateFrom,dateTo,customData);
     }else{
-      // Export last 7 days
       const dates=getLast7Days();
       const days=dates.map(date=>{
         const att=getAttendanceForDate(date);
@@ -337,14 +437,12 @@ const PayrollModal=({employee,attendance,schedules,onClose})=>{
   };
   
   return<div className="modal-overlay" onClick={onClose}><div className="modal" onClick={e=>e.stopPropagation()}><div className="modal-header"><h2>💰 Payroll Details</h2><button className="modal-close" onClick={onClose}>×</button></div><div className="modal-body">
-    {/* Employee Info */}
     <div style={{textAlign:'center',marginBottom:20}}>
       <div style={{width:60,height:60,background:'var(--gradient-accent)',borderRadius:16,display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto',fontSize:'1.5rem',fontWeight:700,color:'var(--bg-dark)'}}>{employee.name.charAt(0)}</div>
       <h3 style={{marginTop:12,color:'var(--accent-primary)'}}>{employee.name}</h3>
       <p style={{color:'var(--text-secondary)',fontSize:'.8rem'}}>{employee.position||'Employee'} • ₱{employee.hourlyRate}/hr</p>
     </div>
     
-    {/* Last 7 Days Summary */}
     <div className="payroll-summary">
       <h3>📊 Last 7 Days Summary</h3>
       <p style={{textAlign:'center',fontSize:'.7rem',color:'var(--text-muted)',marginBottom:16}}>{formatDateShort(last7Days.startDate)} - {formatDateShort(last7Days.endDate)}</p>
@@ -359,7 +457,6 @@ const PayrollModal=({employee,attendance,schedules,onClose})=>{
       </div>
     </div>
     
-    {/* Date Range Picker */}
     <div className="date-range-picker">
       <h4>📅 Custom Date Range</h4>
       <div className="input-row">
@@ -369,7 +466,6 @@ const PayrollModal=({employee,attendance,schedules,onClose})=>{
       <button className="btn btn-primary" style={{width:'100%',marginTop:12}} onClick={generateCustomReport}>Generate Report</button>
     </div>
     
-    {/* Custom Range Results */}
     {showCustomRange&&customData&&<>
       <div className="payroll-summary">
         <h3>📊 Custom Range Summary</h3>
@@ -385,7 +481,6 @@ const PayrollModal=({employee,attendance,schedules,onClose})=>{
         </div>
       </div>
       
-      {/* Daily Breakdown Table */}
       <div style={{overflowX:'auto'}}>
         <table className="payroll-table">
           <thead><tr><th>Date</th><th className="text-right">Hours</th><th className="text-right">Late</th><th className="text-right">OT</th><th className="text-right">Net</th></tr></thead>
@@ -409,11 +504,10 @@ const PayrollModal=({employee,attendance,schedules,onClose})=>{
       </div>
     </>}
     
-    {/* Export Button */}
     <div className="export-section">
       <button className="btn btn-success" onClick={handleExport}>📥 Export to Excel</button>
     </div>
-  </div></div></div>
+  </div></div></div>;
 };
 
 const Dashboard=({employee,attendance,schedules,onRecordTime,onLogout,syncStatus})=>{
@@ -430,7 +524,7 @@ const history=attendance.filter(a=>a.empId===employee.id).sort((a,b)=>normalizeD
 if(sched&&sched.type!=='WORK'){
   const types={REST:['😴','Rest Day'],VL:['🏖️','Vacation Leave'],LWOP:['📋','LWOP'],SUSPENSION:['⚠️','Suspension']};
   const[icon,title]=types[sched.type]||['📅',sched.type];
-  return<div className="app-container"><SyncIndicator status={syncStatus}/><div className="header"><h1>TimeTrack</h1><button className="btn btn-secondary btn-small" onClick={onLogout}>Logout</button></div><div className="page-content"><div className="time-display"><div className="date">{formatDate(now)}</div><div className="time">{now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false})}</div><div className="rest-notice"><div className="icon">{icon}</div><div className="title">{title}</div></div></div></div></div>
+  return<div className="app-container"><SyncIndicator status={syncStatus}/><div className="header"><h1>TimeTrack</h1><button className="btn btn-secondary btn-small" onClick={onLogout}>Logout</button></div><div className="page-content"><div className="time-display"><div className="date">{formatDate(now)}</div><div className="time">{now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false})}</div><div className="rest-notice"><div className="icon">{icon}</div><div className="title">{title}</div></div></div></div></div>;
 }
 
 return<div className="app-container"><SyncIndicator status={syncStatus}/><div className="header"><h1>TimeTrack</h1><button className="btn btn-secondary btn-small" onClick={onLogout}>Logout</button></div><div className="page-content"><div className="time-display"><div className="date">{formatDate(now)}</div><div className="time">{now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false})}</div>
@@ -474,6 +568,7 @@ const[selectedDay,setSelectedDay]=useState(null);
 const[newBranchName,setNewBranchName]=useState('');
 const[newBranchAddr,setNewBranchAddr]=useState('');
 const[payrollEmp,setPayrollEmp]=useState(null);
+const[attDetailDate,setAttDetailDate]=useState(null);
 
 const showToast=(m)=>{setToast(m);setTimeout(()=>setToast(''),2500)};
 const today=getDateKey();
@@ -494,6 +589,8 @@ const aNextMonth=()=>{if(aCalMonth===11){setACalMonth(0);setACalYear(aCalYear+1)
 const handleDaySelect=(d)=>{setSelectedDay(d);const ex=assignEmp?schedules.find(s=>s.empId===assignEmp.id&&normalizeDate(s.date)===d):null;if(ex){setAssignType(ex.type);setAssignTime(ex.morningIn||'08:00');setAssignBranch(ex.branch||branches[0]?.name||'')}else{setAssignType('WORK');setAssignTime('08:00');setAssignBranch(branches[0]?.name||'')}};
 const handleSaveSchedule=async()=>{if(!assignEmp||!selectedDay)return;await onSetSchedule({empId:assignEmp.id,date:selectedDay,type:assignType,morningIn:assignType==='WORK'?assignTime:'',branch:assignType==='WORK'?assignBranch:''});showToast('Schedule saved!');setSelectedDay(null)};
 const handleAddBranch=async()=>{if(!newBranchName)return;await onAddBranch({name:newBranchName,address:newBranchAddr});setNewBranchName('');setNewBranchAddr('');showToast('Branch added!')};
+
+const handleScheduleDayClick=(date)=>{setAttDetailDate(date)};
 
 return<div className="app-container">
 <SyncIndicator status={syncStatus}/>
@@ -522,9 +619,9 @@ return<div className="app-container">
 {tab==='employees'&&<div className="page-content">
 <div className="tab-toggle"><button className={!showAddEmp?'active':''} onClick={()=>setShowAddEmp(false)}>View All</button><button className={showAddEmp?'active':''} onClick={()=>setShowAddEmp(true)}>+ Add New</button></div>
 {!showAddEmp?<>
-<div className="filter-pills">{['all','active','resigned','terminated'].map(f=><div key={f} className={`filter-pill ${empFilter===f?'active':''}`} onClick={()=>setEmpFilter(f)}>{f.charAt(0).toUpperCase()+f.slice(1)}</div>)}</div>
+<div className="filter-pills">{['all','active','resigned','terminated'].map(f=><div key={f} className={'filter-pill'+(empFilter===f?' active':'')} onClick={()=>setEmpFilter(f)}>{f.charAt(0).toUpperCase()+f.slice(1)}</div>)}</div>
 <div className="employee-list">
-{filteredEmps.map(emp=><div key={emp.id} className={`employee-item ${(emp.status||'Active')!=='Active'?'inactive':''}`} onClick={()=>setSelectedEmp(emp)}><div className="emp-row"><div><div className="emp-name">{emp.name}</div><div className="emp-id">{emp.id}</div><div className="emp-position">{emp.position||'Employee'} • ₱{emp.hourlyRate}/hr</div></div><span className={`status-badge ${(emp.status||'Active').toLowerCase()}`}>{emp.status||'Active'}</span></div></div>)}
+{filteredEmps.map(emp=><div key={emp.id} className={'employee-item'+((emp.status||'Active')!=='Active'?' inactive':'')} onClick={()=>setSelectedEmp(emp)}><div className="emp-row"><div><div className="emp-name">{emp.name}</div><div className="emp-id">{emp.id}</div><div className="emp-position">{emp.position||'Employee'} • ₱{emp.hourlyRate}/hr</div></div><span className={'status-badge '+(emp.status||'Active').toLowerCase()}>{emp.status||'Active'}</span></div></div>)}
 {filteredEmps.length===0&&<div className="empty-state"><div className="icon">👤</div><p>No employees found</p></div>}
 </div>
 </>:
@@ -566,20 +663,28 @@ return<div className="app-container">
 {tab==='schedules'&&<div className="page-content">
 <div className="section-title">Select Employee</div>
 <div className="emp-select-list">
-{activeEmps.map(emp=><div key={emp.id} className={`emp-select-item ${viewEmp?.id===emp.id?'selected':''}`} onClick={()=>setViewEmp(emp)}><div className="name">{emp.name}</div><div className="id">{emp.id}</div></div>)}
+{activeEmps.map(emp=><div key={emp.id} className={'emp-select-item'+(viewEmp?.id===emp.id?' selected':'')} onClick={()=>setViewEmp(emp)}><div className="name">{emp.name}</div><div className="id">{emp.id}</div></div>)}
 {activeEmps.length===0&&<div className="empty-state"><div className="icon">👥</div><p>No active employees</p></div>}
 </div>
 {viewEmp&&<>
 <div className="section-title" style={{marginTop:24}}>Schedule Calendar</div>
+<p style={{color:'var(--text-muted)',fontSize:'.75rem',marginBottom:12}}>Tap a date to view attendance details</p>
 <div className="calendar-header"><h3>{monthNames[calMonth]} {calYear}</h3><div className="calendar-nav"><button onClick={prevMonth}>◀</button><button onClick={nextMonth}>▶</button></div></div>
-<ScheduleCalendar schedules={schedules.filter(s=>s.empId===viewEmp.id)} attendance={attendance.filter(a=>a.empId===viewEmp.id)} year={calYear} month={calMonth} showAttendance={true}/>
+<ScheduleCalendar schedules={schedules.filter(s=>s.empId===viewEmp.id)} attendance={attendance.filter(a=>a.empId===viewEmp.id)} year={calYear} month={calMonth} showAttendance={true} onDayClick={handleScheduleDayClick}/>
+{attDetailDate&&<AttendanceDetailModal 
+  employee={viewEmp} 
+  date={attDetailDate} 
+  attendance={attendance.find(a=>a.empId===viewEmp.id&&normalizeDate(a.date)===attDetailDate)} 
+  schedule={schedules.find(s=>s.empId===viewEmp.id&&normalizeDate(s.date)===attDetailDate)} 
+  onClose={()=>setAttDetailDate(null)}
+/>}
 </>}
 </div>}
 
 {tab==='assign'&&<div className="page-content">
 <div className="section-title">Select Employee</div>
 <div className="emp-select-list" style={{marginBottom:20}}>
-{activeEmps.map(emp=><div key={emp.id} className={`emp-select-item ${assignEmp?.id===emp.id?'selected':''}`} onClick={()=>{setAssignEmp(emp);setSelectedDay(null)}}><div className="name">{emp.name}</div><div className="id">{emp.id}</div></div>)}
+{activeEmps.map(emp=><div key={emp.id} className={'emp-select-item'+(assignEmp?.id===emp.id?' selected':'')} onClick={()=>{setAssignEmp(emp);setSelectedDay(null)}}><div className="name">{emp.name}</div><div className="id">{emp.id}</div></div>)}
 </div>
 {assignEmp&&<>
 <div className="section-title">Select Date</div>
@@ -587,7 +692,7 @@ return<div className="app-container">
 <ScheduleCalendar schedules={schedules.filter(s=>s.empId===assignEmp.id)} year={aCalYear} month={aCalMonth} selectedDate={selectedDay} onDayClick={handleDaySelect}/>
 {selectedDay&&<div className="card" style={{marginTop:16}}>
 <h4 style={{marginBottom:16,color:'var(--accent-purple)'}}>📅 {selectedDay}</h4>
-<div className="schedule-types">{['WORK','REST','VL','LWOP','SUSPENSION'].map(t=><button key={t} className={`schedule-type-btn ${assignType===t?'active':''}`} onClick={()=>setAssignType(t)}>{t}</button>)}</div>
+<div className="schedule-types">{['WORK','REST','VL','LWOP','SUSPENSION'].map(t=><button key={t} className={'schedule-type-btn'+(assignType===t?' active':'')} onClick={()=>setAssignType(t)}>{t}</button>)}</div>
 {assignType==='WORK'&&<>
 <div className="input-group"><label>Time In</label><input type="time" value={assignTime} onChange={e=>setAssignTime(e.target.value)}/></div>
 <div className="input-group"><label>Branch</label><select value={assignBranch} onChange={e=>setAssignBranch(e.target.value)}>{branches.map(b=><option key={b.id} value={b.name}>{b.name}</option>)}{branches.length===0&&<option value="">No branches</option>}</select></div>
@@ -626,17 +731,17 @@ return<div className="app-container">
 </div>}
 
 <div className="bottom-nav">
-<button className={`nav-item ${tab==='home'?'active':''}`} onClick={()=>setTab('home')}><span className="nav-icon">🏠</span>Home</button>
-<button className={`nav-item ${tab==='employees'?'active':''}`} onClick={()=>setTab('employees')}><span className="nav-icon">👥</span>Employees</button>
-<button className={`nav-item ${tab==='schedules'?'active':''}`} onClick={()=>setTab('schedules')}><span className="nav-icon">📅</span>Schedules</button>
-<button className={`nav-item ${tab==='assign'?'active':''}`} onClick={()=>setTab('assign')}><span className="nav-icon">✏️</span>Assign</button>
-<button className={`nav-item ${tab==='payroll'?'active':''}`} onClick={()=>setTab('payroll')}><span className="nav-icon">💰</span>Payroll</button>
-<button className={`nav-item ${tab==='settings'?'active':''}`} onClick={()=>setTab('settings')}><span className="nav-icon">⚙️</span>Settings</button>
+<button className={'nav-item'+(tab==='home'?' active':'')} onClick={()=>setTab('home')}><span className="nav-icon">🏠</span>Home</button>
+<button className={'nav-item'+(tab==='employees'?' active':'')} onClick={()=>setTab('employees')}><span className="nav-icon">👥</span>Employees</button>
+<button className={'nav-item'+(tab==='schedules'?' active':'')} onClick={()=>setTab('schedules')}><span className="nav-icon">📅</span>Schedules</button>
+<button className={'nav-item'+(tab==='assign'?' active':'')} onClick={()=>setTab('assign')}><span className="nav-icon">✏️</span>Assign</button>
+<button className={'nav-item'+(tab==='payroll'?' active':'')} onClick={()=>setTab('payroll')}><span className="nav-icon">💰</span>Payroll</button>
+<button className={'nav-item'+(tab==='settings'?' active':'')} onClick={()=>setTab('settings')}><span className="nav-icon">⚙️</span>Settings</button>
 </div>
 {toast&&<div className="success-toast">{toast}</div>}
 </div>};
 
-const LoginScreen=({employees,onLogin,onAdminLogin})=>{const[id,setId]=useState('');const[mode,setMode]=useState('employee');const[error,setError]=useState('');const handleLogin=()=>{if(mode==='employee'){const emp=employees.find(e=>e.id.toUpperCase()===id.toUpperCase());if(!emp){setError('Employee not found');return}if((emp.status||'Active')!=='Active'){setError(`Account is ${emp.status}`);return}onLogin(emp)}else{if(id===ADMIN_PASSWORD)onAdminLogin();else setError('Invalid password')}};return<div className="login-container"><div className="login-card"><div className="logo"><h1>TimeTrack</h1><p>Employee Attendance</p></div><div className="tab-toggle"><button className={mode==='employee'?'active':''} onClick={()=>{setMode('employee');setError('')}}>Employee</button><button className={mode==='admin'?'active':''} onClick={()=>{setMode('admin');setError('')}}>Admin</button></div><div className="input-group"><label>{mode==='employee'?'Employee ID':'Password'}</label><input type={mode==='admin'?'password':'text'} value={id} onChange={e=>{setId(e.target.value);setError('')}} onKeyPress={e=>e.key==='Enter'&&handleLogin()} placeholder={mode==='employee'?'EMP-XXXXXX':'••••••'} autoComplete="off"/></div>{error&&<p className="error-message">{error}</p>}<button className="btn btn-primary" style={{width:'100%'}} onClick={handleLogin}>{mode==='employee'?'Clock In':'Login'}</button></div></div>};
+const LoginScreen=({employees,onLogin,onAdminLogin})=>{const[id,setId]=useState('');const[mode,setMode]=useState('employee');const[error,setError]=useState('');const handleLogin=()=>{if(mode==='employee'){const emp=employees.find(e=>e.id.toUpperCase()===id.toUpperCase());if(!emp){setError('Employee not found');return}if((emp.status||'Active')!=='Active'){setError('Account is '+emp.status);return}onLogin(emp)}else{if(id===ADMIN_PASSWORD)onAdminLogin();else setError('Invalid password')}};return<div className="login-container"><div className="login-card"><div className="logo"><h1>TimeTrack</h1><p>Employee Attendance</p></div><div className="tab-toggle"><button className={mode==='employee'?'active':''} onClick={()=>{setMode('employee');setError('')}}>Employee</button><button className={mode==='admin'?'active':''} onClick={()=>{setMode('admin');setError('')}}>Admin</button></div><div className="input-group"><label>{mode==='employee'?'Employee ID':'Password'}</label><input type={mode==='admin'?'password':'text'} value={id} onChange={e=>{setId(e.target.value);setError('')}} onKeyPress={e=>e.key==='Enter'&&handleLogin()} placeholder={mode==='employee'?'EMP-XXXXXX':'••••••'} autoComplete="off"/></div>{error&&<p className="error-message">{error}</p>}<button className="btn btn-primary" style={{width:'100%'}} onClick={handleLogin}>{mode==='employee'?'Clock In':'Login'}</button></div></div>};
 
 const App=()=>{
 const[configured,setConfigured]=useState(!!getApiUrl());
