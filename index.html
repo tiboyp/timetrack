@@ -262,7 +262,7 @@ const monthNames=['January','February','March','April','May','June','July','Augu
 
 const exportPayrollToExcel=(employee,dateFrom,dateTo,payrollData)=>{
   const wb=XLSX.utils.book_new();
-  const headerInfo=[['PAYROLL REPORT'],[''],['Employee Name:',employee.name],['Employee ID:',employee.id],['Position:',employee.position||''],['Hourly Rate:','₱'+employee.hourlyRate],['Period:',formatDateExcel(dateFrom)+' - '+formatDateExcel(dateTo)],['Generated:',new Date().toLocaleString('en-US')],['']];
+  const headerInfo=[['PAYROLL REPORT'],[''],['Employee Name:',employee.name],['Employee ID:',employee.id],['Position:',employee.position||''],['Hourly Rate:','₱'+employee.hourlyRate],['Period:',formatDateExcel(dateFrom)+' - '+formatDateExcel(dateTo)],['Generated:',new Date().toLocaleString('en-US'),['']],['']];
   const columnHeaders=['Date','Day','Schedule Type','Branch','Morning In','Morning Out','Afternoon In','Afternoon Out','Hours Worked','OT Hours','Minutes Late','Basic Pay','OT Pay','Holiday Pay','Deductions','Net Pay'];
   const dataRows=payrollData.days.map(d=>{const att=d.att||{};const dayName=new Date(d.date+'T12:00:00').toLocaleDateString('en-US',{weekday:'short'});return[formatDateExcel(d.date),dayName,d.sched?.type||'No Schedule',d.sched?.branch||'',formatTimeExcel(att.morningIn),formatTimeExcel(att.morningOut),formatTimeExcel(att.afternoonIn),formatTimeExcel(att.afternoonOut),(d.pay.workMin/60).toFixed(2),(d.pay.otMin/60).toFixed(2),d.pay.totalLate,d.pay.basic.toFixed(2),d.pay.ot.toFixed(2),d.pay.holiday.toFixed(2),d.pay.deduct.toFixed(2),d.pay.net.toFixed(2)]});
   const totalsRow=['TOTALS','','','','','','','',payrollData.totals.hours.toFixed(2),payrollData.totals.otHours.toFixed(2),payrollData.totals.late,payrollData.totals.basic.toFixed(2),payrollData.totals.ot.toFixed(2),payrollData.totals.holiday.toFixed(2),payrollData.totals.deduct.toFixed(2),payrollData.totals.net.toFixed(2)];
@@ -280,7 +280,7 @@ const LoadingScreen=()=><div className="loading-screen"><div className="loading-
 const SyncIndicator=({status})=><div className={`sync-indicator ${status}`}><div className={`sync-dot ${status}`}/>{status==='syncing'?'Syncing...':status==='synced'?'Synced':'Offline'}</div>;
 const TimeButton=({label,time,onClick,disabled,isLate,lateMin,hasLoc})=><button className={`btn-time ${time?(isLate?'late':'recorded'):''}`} onClick={onClick} disabled={disabled}><span className="time-value">{time?formatTime(time):'--:--'}</span><span className="time-label">{label}</span>{time&&isLate&&<span className="badge late-badge">LATE {lateMin}m</span>}{time&&hasLoc&&<span className="badge loc-badge">📍</span>}</button>;
 
-const ScheduleCalendar=({schedules,attendance,year,month,selectedDate,onDayClick,showAttendance})=>{
+const ScheduleCalendar=({schedules,attendance,year,month,selectedDate,selectedDates,onDayClick,showAttendance})=>{
   const{firstDay,daysInMonth}=getMonthData(year,month);
   const today=getDateKey();
   const days=[];
@@ -290,7 +290,7 @@ const ScheduleCalendar=({schedules,attendance,year,month,selectedDate,onDayClick
     const sc=schedules.find(s=>normalizeDate(s.date)===ds);
     const att=attendance?attendance.find(a=>normalizeDate(a.date)===ds):null;
     const isToday=ds===today;
-    const isSel=ds===selectedDate;
+    const isSel=selectedDate===ds||(selectedDates&&selectedDates.includes(ds));
     const hasAtt=att&&att.morningIn;
     days.push(
       <div key={d} className={'calendar-day'+(isToday?' today':'')+(isSel?' selected':'')+(sc?' has-schedule':'')+(hasAtt&&showAttendance?' has-attendance':'')+(sc&&sc.type!=='WORK'?' rest':'')} onClick={()=>onDayClick&&onDayClick(ds)}>
@@ -564,7 +564,7 @@ const[assignTime,setAssignTime]=useState('08:00');
 const[assignBranch,setAssignBranch]=useState(branches[0]?.name||'');
 const[aCalYear,setACalYear]=useState(new Date().getFullYear());
 const[aCalMonth,setACalMonth]=useState(new Date().getMonth());
-const[selectedDay,setSelectedDay]=useState(null);
+const[selectedDays,setSelectedDays]=useState([]);
 const[newBranchName,setNewBranchName]=useState('');
 const[newBranchAddr,setNewBranchAddr]=useState('');
 const[payrollEmp,setPayrollEmp]=useState(null);
@@ -586,8 +586,8 @@ const prevMonth=()=>{if(calMonth===0){setCalMonth(11);setCalYear(calYear-1)}else
 const nextMonth=()=>{if(calMonth===11){setCalMonth(0);setCalYear(calYear+1)}else setCalMonth(calMonth+1)};
 const aPrevMonth=()=>{if(aCalMonth===0){setACalMonth(11);setACalYear(aCalYear-1)}else setACalMonth(aCalMonth-1)};
 const aNextMonth=()=>{if(aCalMonth===11){setACalMonth(0);setACalYear(aCalYear+1)}else setACalMonth(aCalMonth+1)};
-const handleDaySelect=(d)=>{setSelectedDay(d);const ex=assignEmp?schedules.find(s=>s.empId===assignEmp.id&&normalizeDate(s.date)===d):null;if(ex){setAssignType(ex.type);setAssignTime(ex.morningIn||'08:00');setAssignBranch(ex.branch||branches[0]?.name||'')}else{setAssignType('WORK');setAssignTime('08:00');setAssignBranch(branches[0]?.name||'')}};
-const handleSaveSchedule=async()=>{if(!assignEmp||!selectedDay)return;await onSetSchedule({empId:assignEmp.id,date:selectedDay,type:assignType,morningIn:assignType==='WORK'?assignTime:'',branch:assignType==='WORK'?assignBranch:''});showToast('Schedule saved!');setSelectedDay(null)};
+const handleDaySelect=(d)=>{setSelectedDays(prev=>prev.includes(d)?prev.filter(x=>x!==d):[...prev,d].sort())};
+const handleSaveSchedule=async()=>{if(!assignEmp||selectedDays.length===0)return;for(const day of selectedDays){await onSetSchedule({empId:assignEmp.id,date:day,type:assignType,morningIn:assignType==='WORK'?assignTime:'',branch:assignType==='WORK'?assignBranch:''})}showToast(selectedDays.length+' schedule(s) saved!');setSelectedDays([])};
 const handleAddBranch=async()=>{if(!newBranchName)return;await onAddBranch({name:newBranchName,address:newBranchAddr});setNewBranchName('');setNewBranchAddr('');showToast('Branch added!')};
 
 const handleScheduleDayClick=(date)=>{setAttDetailDate(date)};
@@ -684,20 +684,22 @@ return<div className="app-container">
 {tab==='assign'&&<div className="page-content">
 <div className="section-title">Select Employee</div>
 <div className="emp-select-list" style={{marginBottom:20}}>
-{activeEmps.map(emp=><div key={emp.id} className={'emp-select-item'+(assignEmp?.id===emp.id?' selected':'')} onClick={()=>{setAssignEmp(emp);setSelectedDay(null)}}><div className="name">{emp.name}</div><div className="id">{emp.id}</div></div>)}
+{activeEmps.map(emp=><div key={emp.id} className={'emp-select-item'+(assignEmp?.id===emp.id?' selected':'')} onClick={()=>{setAssignEmp(emp);setSelectedDays([])}}><div className="name">{emp.name}</div><div className="id">{emp.id}</div></div>)}
 </div>
 {assignEmp&&<>
 <div className="section-title">Select Date</div>
 <div className="calendar-header"><h3>{monthNames[aCalMonth]} {aCalYear}</h3><div className="calendar-nav"><button onClick={aPrevMonth}>◀</button><button onClick={aNextMonth}>▶</button></div></div>
-<ScheduleCalendar schedules={schedules.filter(s=>s.empId===assignEmp.id)} year={aCalYear} month={aCalMonth} selectedDate={selectedDay} onDayClick={handleDaySelect}/>
-{selectedDay&&<div className="card" style={{marginTop:16}}>
-<h4 style={{marginBottom:16,color:'var(--accent-purple)'}}>📅 {selectedDay}</h4>
+<ScheduleCalendar schedules={schedules.filter(s=>s.empId===assignEmp.id)} year={aCalYear} month={aCalMonth} selectedDates={selectedDays} onDayClick={handleDaySelect}/>
+{selectedDays.length>0&&<div className="card" style={{marginTop:16}}>
+<h4 style={{marginBottom:16,color:'var(--accent-purple)'}}>📅 {selectedDays.length} date{selectedDays.length>1?'s':''} selected</h4>
+<div style={{fontSize:'.75rem',color:'var(--text-muted)',marginBottom:12,maxHeight:60,overflowY:'auto'}}>{selectedDays.join(', ')}</div>
 <div className="schedule-types">{['WORK','REST','VL','LWOP','SUSPENSION'].map(t=><button key={t} className={'schedule-type-btn'+(assignType===t?' active':'')} onClick={()=>setAssignType(t)}>{t}</button>)}</div>
 {assignType==='WORK'&&<>
 <div className="input-group"><label>Time In</label><input type="time" value={assignTime} onChange={e=>setAssignTime(e.target.value)}/></div>
 <div className="input-group"><label>Branch</label><select value={assignBranch} onChange={e=>setAssignBranch(e.target.value)}>{branches.map(b=><option key={b.id} value={b.name}>{b.name}</option>)}{branches.length===0&&<option value="">No branches</option>}</select></div>
 </>}
-<button className="btn btn-primary" style={{width:'100%',marginTop:12}} onClick={handleSaveSchedule}>Save Schedule</button>
+<button className="btn btn-primary" style={{width:'100%',marginTop:12}} onClick={handleSaveSchedule}>Save {selectedDays.length} Schedule{selectedDays.length>1?'s':''}</button>
+<button className="btn btn-secondary" style={{width:'100%',marginTop:8}} onClick={()=>setSelectedDays([])}>Clear Selection</button>
 </div>}
 </>}
 </div>}
