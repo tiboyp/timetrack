@@ -528,7 +528,7 @@ if(sched&&sched.type!=='WORK'){
 }
 
 return<div className="app-container"><SyncIndicator status={syncStatus}/><div className="header"><h1>TimeTrack</h1><button className="btn btn-secondary btn-small" onClick={onLogout}>Logout</button></div><div className="page-content"><div className="time-display"><div className="date">{formatDate(now)}</div><div className="time">{now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false})}</div>
-{sched?<div className="schedule-info"><div className="schedule-item"><div className="label">Time In</div><div className="value">{formatTime24(sched.morningIn)}</div></div><div className="schedule-item"><div className="label">Branch</div><div className="value">{sched.branch||'N/A'}</div></div><div className="schedule-item"><div className="label">Rate</div><div className="value">₱{employee.hourlyRate}/hr</div></div></div>
+{sched?<div className="schedule-info"><div className="schedule-item"><div className="label">Time In</div><div className="value">{formatTime24(sched.morningIn)}</div></div><div className="schedule-item"><div className="label">Branch</div><div className="value">{sched.branch||'N/A'}</div></div></div>
 :<div className="no-schedule-notice">📋 No schedule assigned - You can still clock in</div>}
 {hol&&<div style={{marginTop:14,padding:12,background:'rgba(255,170,0,0.1)',borderRadius:10,textAlign:'center',fontSize:'.85rem'}}><span style={{color:'var(--accent-warning)'}}>{hol.name}</span><span style={{marginLeft:8,color:'var(--accent-pink)'}}>{hol.type==='regular'?'200%':'130%'}</span></div>}
 </div>
