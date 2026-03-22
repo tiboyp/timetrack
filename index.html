@@ -543,9 +543,9 @@ return<div className="app-container"><SyncIndicator status={syncStatus}/><div cl
 <TimeButton label="Time Out" time={rec.afternoonOut} onClick={()=>onRecordTime('afternoonOut')} disabled={!rec.afternoonIn||!!rec.afternoonOut} hasLoc={rec.afternoonOutLat}/>
 </div></div>
 
-<div className="time-section"><h3>Today's Summary</h3><div className="summary-grid"><div className="summary-card"><div className="value">{(pay.workMin/60).toFixed(1)}</div><div className="label">Hours</div></div><div className="summary-card late"><div className="value">{pay.totalLate}</div><div className="label">Late</div></div><div className="summary-card pay"><div className="value">₱{pay.net.toFixed(0)}</div><div className="label">Net</div></div></div></div>
+<div className="time-section"><h3>Today's Summary</h3><div className="summary-grid"><div className="summary-card"><div className="value">{(pay.workMin/60).toFixed(1)}</div><div className="label">Hours</div></div><div className="summary-card late"><div className="value">{pay.totalLate}</div><div className="label">Late</div></div></div></div>
 
-{history.length>0&&<div className="time-section"><h3>Recent</h3><div className="history-list">{history.map(r=>{const s=schedules.find(x=>x.empId===employee.id&&normalizeDate(x.date)===normalizeDate(r.date));const p=calcPay(r,s,employee,normalizeDate(r.date));return<div key={normalizeDate(r.date)} className="history-item"><div><div className="date">{normalizeDate(r.date)}</div><div className="hours">{(p.workMin/60).toFixed(1)}hrs</div></div><div className="pay">₱{p.net.toFixed(0)}</div></div>})}</div></div>}
+{history.length>0&&<div className="time-section"><h3>Recent</h3><div className="history-list">{history.map(r=>{const s=schedules.find(x=>x.empId===employee.id&&normalizeDate(x.date)===normalizeDate(r.date));const p=calcPay(r,s,employee,normalizeDate(r.date));return<div key={normalizeDate(r.date)} className="history-item"><div><div className="date">{normalizeDate(r.date)}</div><div className="hours">{(p.workMin/60).toFixed(1)}hrs</div></div></div>})}</div></div>}
 </div></div>};
 
 const AdminPanel=({employees,attendance,schedules,branches,onAddEmployee,onSetSchedule,onUpdateStatus,onAddBranch,onDeleteBranch,onLogout,syncStatus})=>{
